@@ -15,7 +15,7 @@ class MoneyField(forms.MultiValueField):
         choices = choices or [
             (c.code, u"{0} - {1}".format(c.code, c.name),) for i, c in sorted(CURRENCY.items()) if c.code != u'XXX']
 
-        self.widget = widget() if widget is not None else CurrencySelectWidget(choices)
+        self.widget = widget if widget is not None else CurrencySelectWidget(choices)
 
         fields = (
             forms.DecimalField(
