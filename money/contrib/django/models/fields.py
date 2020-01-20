@@ -58,6 +58,8 @@ class MoneyFieldProxy(object):
         obj.__dict__[self.field.currency_field_name] = currency
 
     def __get__(self, obj, *args):
+        if obj is None:
+            return self
         amount, currency = self._get_values(obj)
         if amount is None:
             return None
