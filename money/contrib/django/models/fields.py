@@ -128,7 +128,7 @@ class CurrencyField(models.CharField):
         When serializing, we want to output as two values. This will be just
         the currency part as stored directly in the database.
         """
-        value = self._get_val_from_obj(obj)
+        value = self.value_from_object(obj)
         return value
 
 
@@ -250,7 +250,7 @@ class MoneyField(InfiniteDecimalField):
         Here we only need to output the value. The contributed currency field
         will get called to output itself
         """
-        value = self._get_val_from_obj(obj)
+        value = self.value_from_object(obj)
         return value.amount
 
     def formfield(self, **kwargs):
