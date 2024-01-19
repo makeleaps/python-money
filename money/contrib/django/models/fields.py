@@ -1,7 +1,7 @@
 from decimal import Decimal
 
 from django.db import models
-from django.utils.translation import ugettext_lazy
+from django.utils.translation import gettext_lazy
 
 from money.contrib.django import forms
 from money.money import Money
@@ -133,7 +133,7 @@ class CurrencyField(models.CharField):
 
 
 class MoneyField(InfiniteDecimalField):
-    description = ugettext_lazy('An amount and type of currency')
+    description = gettext_lazy('An amount and type of currency')
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
