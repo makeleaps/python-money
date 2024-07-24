@@ -65,8 +65,12 @@ def call_git_describe(abbrev=5):
 
     """
     try:
-        p = Popen(['git', 'describe', '--long', '--tags', '--always',
-                   '--abbrev=%d' % abbrev], stdout=PIPE, stderr=PIPE)
+        p = Popen(
+            ['git', 'describe', '--long', '--tags', '--always', '--abbrev=%d' % abbrev],
+            stdout=PIPE,
+            stderr=PIPE,
+            encoding='utf-8',
+        )
         p.stderr.close()
         line = p.stdout.readlines()[0].strip()
 
