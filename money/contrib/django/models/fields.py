@@ -223,6 +223,7 @@ class MoneyField(InfiniteDecimalField):
 
         return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
 
+    # TODO: NOT SUPPORTED IN DJANGO 4.0
     def get_prep_lookup(self, lookup_type, value):
         """
         Prepares the value for passing to the database when used in a lookup
@@ -266,27 +267,3 @@ class MoneyField(InfiniteDecimalField):
         # Hack around the fact that we inherit from DecimalField but don't hold
         # Decimals. The real fix is to stop inheriting from DecimalField.
         return []
-
-
-# South introspection rules
-# (see http://south.aeracode.org/docs/customfields.html#extending-introspection)
-try:
-    from south.modelsinspector import add_introspection_rules
-
-    # South must know if a field was dynamically added to the class when it freezes it. We pass
-    # this in as a parameter to the field when it is created. The 'add_currency_field' attribute
-    # is normally True in a MoneyField. This means that 'no_currency_field' is True when frozen.
-    #
-    # See: http://south.aeracode.org/ticket/327
-    # See: https://bitbucket.org/carljm/django-markitup/changeset/eb788c807dd8
-    # See: http://south.aeracode.org/docs/customfields.html
-    add_introspection_rules(
-        patterns=[r"^money\.contrib\.django.\models\.fields\.MoneyField"],
-        rules=[((MoneyField,), [], {"no_currency_field": ("add_currency_field", {})})],
-    )
-    add_introspection_rules(
-        patterns=[r"^money\.contrib\.django.\models\.fields\.CurrencyField"], rules=[]
-    )
-except ImportError:
-    # South isn't installed
-    pass

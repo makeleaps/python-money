@@ -119,10 +119,10 @@ def test_arithmetic(value, expected):
 
 MONEY_ARITHMETIC_UNSUPPORTED = [
     # Modulus
-    (lambda: 4 % Money("100")),
-    (lambda: Decimal("4") % Money("100")),
-    (lambda: Money("100") % 4),
-    (lambda: Money("100") % Decimal("4")),
+    (lambda: 4 % Money("100")),  # type: ignore[operator]
+    (lambda: Decimal("4") % Money("100")),  # type: ignore[operator]
+    (lambda: Money("100") % 4),  # type: ignore[operator]
+    (lambda: Money("100") % Decimal("4")),  # type: ignore[operator]
     # Division: floor division (see future import above)
     (lambda: Money("100") // 4),
     (lambda: Money("100") // Decimal("4")),

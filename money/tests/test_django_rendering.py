@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 import pytest
 
-from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
+from django.urls import reverse
 
 from money.tests import settings as test_settings
 

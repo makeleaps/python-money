@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+from typing import Iterable, Optional
+
 import pytest
 
 from django.test import TestCase
@@ -16,7 +18,9 @@ from money.tests.models import (
 
 @pytest.mark.django_db
 class MoneyFieldTestCase(TestCase):
-    def assertSameCurrency(self, moneys, currency_code=None):
+    def assertSameCurrency(
+        self, moneys: Iterable[Money], currency_code: Optional[str] = None
+    ):
         """Utility function to assert a collection of currencies are all the same"""
         currency_codes = set([m.currency.code for m in moneys])
         self.assertTrue(len(currency_codes) == 1)

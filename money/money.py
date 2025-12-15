@@ -2,19 +2,24 @@
 from __future__ import division, unicode_literals
 
 from decimal import Decimal
-
-import six
+from typing import Optional, Union
 
 
 class Currency(object):
-    code = "XXX"
-    country = ""
-    countries = []
-    name = ""
-    numeric = "999"
+    code: str = "XXX"
+    country: str = ""
+    countries: list[str] = []
+    name: str = ""
+    numeric: str = "999"
 
     def __init__(
-        self, code="", numeric="999", name="", symbol="", decimals=2, countries=None
+        self,
+        code: str = "",
+        numeric: str = "999",
+        name: str = "",
+        symbol: str = "",
+        decimals: int = 2,
+        countries: Optional[list[str]] = None,
     ):
         if not countries:
             countries = []
@@ -31,7 +36,7 @@ class Currency(object):
     def __eq__(self, other):
         if isinstance(other, Currency):
             return self.code and other.code and self.code == other.code
-        if isinstance(other, six.string_types):
+        if isinstance(other, str):
             return self.code == other
         return False
 
@@ -39,9 +44,9 @@ class Currency(object):
         return not self.__eq__(other)
 
 
-CURRENCY = {}
+CURRENCY: dict[str, Currency] = {}
 CURRENCY["XXX"] = Currency(code="XXX", numeric="999")
-DEFAULT_CURRENCY = CURRENCY["XXX"]
+DEFAULT_CURRENCY: Currency = CURRENCY["XXX"]
 
 
 class IncorrectMoneyInputError(Exception):
@@ -56,7 +61,6 @@ class InvalidOperationException(TypeError):
     """Raised when an operation is never allowed"""
 
 
-@six.python_2_unicode_compatible
 class Money(object):
     """
     An amount of money with an optional currency
@@ -88,6 +92,9 @@ class Money(object):
 
     """
 
+    _amount: Decimal
+    _currency: Currency
+
     @classmethod
     def _from_string(cls, value):
         s = str(value).strip()
@@ -105,25 +112,25 @@ class Money(object):
         return amount, currency
 
     @classmethod
-    def from_string(cls, value):
+    def from_string(cls, value) -> "Money":
         """
         Parses a properly formatted string. The string should be formatted as
         given by the repr function: 'USD 123.45'
         """
         return Money(*cls._from_string(value))
 
-    def _currency_check(self, other):
+    def _currency_check(self, other: "Money") -> None:
         """Compare the currencies matches and raise if not"""
         if self._currency != other.currency:
             raise CurrencyMismatchException(
-                "Currency mismatch: %s != %s"
-                % (
-                    self._currency,
-                    other.currency,
-                )
+                "Currency mismatch: %s != %s" % (self._currency, other.currency)
             )
 
-    def __init__(self, amount=None, currency=None):
+    def __init__(
+        self,
+        amount: Optional[Union[str, Decimal, int, float]] = None,
+        currency: Optional[Union[str, Currency]] = None,
+    ):
         if isinstance(amount, Decimal):
             self._amount = amount
         else:
@@ -136,8 +143,12 @@ class Money(object):
                     if currency:
                         raise IncorrectMoneyInputError(
                             "Initialized with conflicting currencies %s %s"
-                            % currency.code,
-                            self._amount,
+                            % (
+                                currency.code
+                                if isinstance(currency, Currency)
+                                else currency,
+                                self._amount,
+                            )
                         )
 
                     self._amount, currency = self._from_string(amount)
@@ -244,7 +255,7 @@ class Money(object):
     __nonzero__ = __bool__
 
     # Comparison operators
-    def __eq__(self, other):
+    def __eq__(self, other: Optional[Union["Money", int, float]]) -> bool:  # type: ignore[override]
         if isinstance(other, Money):
             return (self._amount == other.amount) and (self._currency == other.currency)
         # Allow comparison to 0

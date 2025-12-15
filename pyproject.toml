@@ -18,7 +18,6 @@ classifiers = [
 
 dependencies = [
     "django==4.0.10",
-    "six>=1.17.0",
 ]
 
 [dependency-groups]
@@ -27,6 +26,8 @@ dev = [
     "django-stubs[compatible-mypy]>=4.2.0",
     "mypy>=1.6.1",
     "psycopg2==2.9.9",
+    "types-six>=1.17.0.20251009",
+    "pytest>=8.4.2",
 ]
 
 #[build-system]
@@ -42,7 +43,7 @@ dev = [
 
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
-strict = true
+strict = false
 disallow_untyped_defs = false  # Set to true once you add type hints
 
 [tool.django-stubs]

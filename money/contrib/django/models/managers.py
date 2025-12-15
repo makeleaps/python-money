@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models.query import QuerySet
-from django.utils.encoding import smart_text
+from django.utils.encoding import smart_str
 from .fields import currency_field_name
 
 __all__ = (
@@ -22,7 +22,7 @@ class QuerysetWithMoney(QuerySet):
                     field_name = currency_field_name(path[0])
                 else:
                     field_name = currency_field_name(name)
-                to_append[field_name] = smart_text(value.currency)
+                to_append[field_name] = smart_str(value.currency)
         kwargs.update(to_append)
         return kwargs
 

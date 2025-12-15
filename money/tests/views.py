@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 from django import forms
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 
 from money.money import Money
 from money.contrib.django.forms.fields import MoneyField
@@ -15,7 +15,6 @@ class SampleForm(forms.Form):
 class SampleModelForm(forms.ModelForm):
     class Meta:
         model = SimpleMoneyModel
-        fields = "__all__"
 
         fields = (
             "name",
@@ -25,13 +24,13 @@ class SampleModelForm(forms.ModelForm):
 
 def instance_view(request):
     money = Money("0.0", "JPY")
-    return render_to_response("view.html", {"money": money})
+    return render(request, "view.html", {"money": money})
 
 
 def model_view(request):
     instance = SimpleMoneyModel(price=Money("0.0", "JPY"))
     money = instance.price
-    return render_to_response("view.html", {"money": money})
+    return render(request, "view.html", {"money": money})
 
 
 def model_from_db_view(request, amount="0", currency="XXX"):
@@ -40,7 +39,7 @@ def model_from_db_view(request, amount="0", currency="XXX"):
     instance = SimpleMoneyModel.objects.get(pk=instance.pk)
 
     money = instance.price
-    return render_to_response("view.html", {"money": money})
+    return render(request, "view.html", {"money": money})
 
 
 def model_form_view(request, amount="0", currency="XXX"):
@@ -54,7 +53,7 @@ def model_form_view(request, amount="0", currency="XXX"):
     else:
         form = SampleModelForm(initial={"price": Money(amount, currency)})
 
-    return render_to_response("form.html", {"form": form, "cleaned_data": cleaned_data})
+    return render(request, "form.html", {"form": form, "cleaned_data": cleaned_data})
 
 
 def regular_form(request):
@@ -63,10 +62,10 @@ def regular_form(request):
 
         if form.is_valid():
             price = form.cleaned_data["price"]
-            return render_to_response("form.html", {"price": price})
+            return render(request, "form.html", {"price": price})
     else:
         form = SampleForm()
-    return render_to_response("form.html", {"form": form})
+    return render(request, "form.html", {"form": form})
 
 
 def regular_form_edit(request, id):
@@ -77,10 +76,10 @@ def regular_form_edit(request, id):
 
         if form.is_valid():
             price = form.cleaned_data["price"]
-            return render_to_response("form.html", {"price": price})
+            return render(request, "form.html", {"price": price})
     else:
         form = SampleForm(initial={"price": instance.price})
-    return render_to_response("form.html", {"form": form})
+    return render(request, "form.html", {"form": form})
 
 
 def model_form_edit(request, id):
@@ -91,7 +90,7 @@ def model_form_edit(request, id):
         if form.is_valid():
             price = form.cleaned_data["price"]
             form.save()
-            return render_to_response("form.html", {"price": price})
+            return render(request, "form.html", {"price": price})
     else:
         form = SampleModelForm(instance=instance)
-    return render_to_response("form.html", {"form": form})
+    return render(request, "form.html", {"form": form})
