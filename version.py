@@ -50,7 +50,7 @@ from __future__ import print_function, unicode_literals
 
 from subprocess import Popen, PIPE
 
-__all__ = ("get_git_version")
+__all__ = "get_git_version"
 
 
 def call_git_describe(abbrev=5):
@@ -66,20 +66,20 @@ def call_git_describe(abbrev=5):
     """
     try:
         p = Popen(
-            ['git', 'describe', '--long', '--tags', '--always', '--abbrev=%d' % abbrev],
+            ["git", "describe", "--long", "--tags", "--always", "--abbrev=%d" % abbrev],
             stdout=PIPE,
             stderr=PIPE,
-            encoding='utf-8',
+            encoding="utf-8",
         )
         p.stderr.close()
         line = p.stdout.readlines()[0].strip()
 
-        tag, count, sha = line.split('-')
+        tag, count, sha = line.split("-")
         return tag, count, sha
     except ValueError:
         # This can happen if "No tags can describe" the SHA. We'll use 'line'
         # which should now be the sha due to the --always flag
-        return None, '0', line
+        return None, "0", line
     except:
         # Unknown error. Not a git repo?
         return (None, None, None)
@@ -127,7 +127,7 @@ def get_git_version(abbrev=4):
     # First try to get the current version using "git describe".
     tag, count, _ = call_git_describe(abbrev)
 
-    if count == '0':
+    if count == "0":
         if tag:
             # Normal tagged release
             version = tag
@@ -154,6 +154,7 @@ def get_git_version(abbrev=4):
 def get_git_hash():
     _, _, sha = call_git_describe()
     return sha
+
 
 if __name__ == "__main__":
     print(get_git_version())

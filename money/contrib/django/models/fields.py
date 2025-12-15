@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy
 from money.contrib.django import forms
 from money.money import Money
 
-__all__ = ('MoneyField', 'currency_field_name', 'NotSupportedLookup')
+__all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
 
 
 def currency_field_name(name):
@@ -17,7 +17,7 @@ def currency_field_db_column(db_column):
     return None if db_column is None else "%s_currency" % db_column
 
 
-SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte', 'isnull')
+SUPPORTED_LOOKUPS = ("exact", "lt", "gt", "lte", "gte", "isnull")
 
 
 class NotSupportedLookup(TypeError):
@@ -50,8 +50,10 @@ class MoneyFieldProxy(object):
         self.currency_field_name = currency_field_name(field.name)
 
     def _get_values(self, obj):
-        return (obj.__dict__.get(self.field.amount_field_name, None),
-                obj.__dict__.get(self.field.currency_field_name, None))
+        return (
+            obj.__dict__.get(self.field.amount_field_name, None),
+            obj.__dict__.get(self.field.currency_field_name, None),
+        )
 
     def _set_values(self, obj, amount, currency):
         obj.__dict__[self.field.amount_field_name] = amount
@@ -67,7 +69,7 @@ class MoneyFieldProxy(object):
 
     def __set__(self, obj, value):
         if value is None:  # Money(0) is False
-            self._set_values(obj, None, '')
+            self._set_values(obj, None, "")
         elif isinstance(value, Money):
             self._set_values(obj, value.amount, value.currency.code)
         elif isinstance(value, Decimal):
@@ -93,10 +95,10 @@ class MoneyFieldProxy(object):
 
 class InfiniteDecimalField(models.DecimalField):
     def db_type(self, connection):
-        engine = connection.settings_dict['ENGINE']
+        engine = connection.settings_dict["ENGINE"]
 
-        if 'postgresql' in engine:
-            return 'numeric'
+        if "postgresql" in engine:
+            return "numeric"
 
         return super(InfiniteDecimalField, self).db_type(connection=connection)
 
@@ -133,7 +135,7 @@ class CurrencyField(models.CharField):
 
 
 class MoneyField(InfiniteDecimalField):
-    description = gettext_lazy('An amount and type of currency')
+    description = gettext_lazy("An amount and type of currency")
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
@@ -141,23 +143,23 @@ class MoneyField(InfiniteDecimalField):
 
     def __init__(self, *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
-        default_currency = kwargs.pop("default_currency", '')
+        default_currency = kwargs.pop("default_currency", "")
         default = kwargs.get("default", None)
-        self.add_currency_field = not kwargs.pop('no_currency_field', False)
+        self.add_currency_field = not kwargs.pop("no_currency_field", False)
 
-        self.blankable = kwargs.get('blank', False)
+        self.blankable = kwargs.get("blank", False)
 
         if isinstance(default, Money):
             self.default_currency = default.currency  # use the default's currency
-            kwargs['default'] = default.amount
+            kwargs["default"] = default.amount
         else:
-            self.default_currency = default_currency or ''  # use the kwarg passed in
+            self.default_currency = default_currency or ""  # use the kwarg passed in
 
         super(MoneyField, self).__init__(*args, **kwargs)
 
     def deconstruct(self):
         name, path, args, kwargs = super(MoneyField, self).deconstruct()
-        kwargs['no_currency_field'] = True
+        kwargs["no_currency_field"] = True
         return name, path, args, kwargs
 
     # Implementing to_python should not be needed because we are directly
@@ -165,7 +167,7 @@ class MoneyField(InfiniteDecimalField):
     # of the model forms code still tries to call to_python on the field
     # directly which will coerce the Money value into a string
     # representation. To handle this, we're checking for string and seeing if
-    # we can split it into two pieces. Otherwise we assume we're dealing with
+    # we can split it into two pieces. Otherwise, we assume we're dealing with
     # a string value
     def to_python(self, value):
         if isinstance(value, str):
@@ -203,9 +205,10 @@ class MoneyField(InfiniteDecimalField):
         setattr(cls, self.name, MoneyFieldProxy(self))
 
         # Set our custom manager
-        if not hasattr(cls, '_default_manager'):
+        if not hasattr(cls, "_default_manager"):
             from .managers import MoneyManager
-            cls.add_to_class('objects', MoneyManager())
+
+            cls.add_to_class("objects", MoneyManager())
 
     def get_db_prep_save(self, value, *args, **kwargs):
         """
@@ -254,7 +257,7 @@ class MoneyField(InfiniteDecimalField):
         return value.amount
 
     def formfield(self, **kwargs):
-        defaults = {'form_class': forms.MoneyField}
+        defaults = {"form_class": forms.MoneyField}
         defaults.update(kwargs)
         return super(MoneyField, self).formfield(**defaults)
 
@@ -269,6 +272,7 @@ class MoneyField(InfiniteDecimalField):
 # (see http://south.aeracode.org/docs/customfields.html#extending-introspection)
 try:
     from south.modelsinspector import add_introspection_rules
+
     # South must know if a field was dynamically added to the class when it freezes it. We pass
     # this in as a parameter to the field when it is created. The 'add_currency_field' attribute
     # is normally True in a MoneyField. This means that 'no_currency_field' is True when frozen.
@@ -278,17 +282,10 @@ try:
     # See: http://south.aeracode.org/docs/customfields.html
     add_introspection_rules(
         patterns=[r"^money\.contrib\.django.\models\.fields\.MoneyField"],
-        rules=[
-            (
-                (MoneyField,),
-                [],
-                {'no_currency_field': ('add_currency_field', {})}
-            )
-        ]
+        rules=[((MoneyField,), [], {"no_currency_field": ("add_currency_field", {})})],
     )
     add_introspection_rules(
-        patterns=[r"^money\.contrib\.django.\models\.fields\.CurrencyField"],
-        rules=[]
+        patterns=[r"^money\.contrib\.django.\models\.fields\.CurrencyField"], rules=[]
     )
 except ImportError:
     # South isn't installed

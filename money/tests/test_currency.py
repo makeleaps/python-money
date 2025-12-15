@@ -5,46 +5,50 @@ from money.money import (
 
 def test_currency_equality():
     """
-    The currency 3 letter code is what makes something unique
+    The currency 3-letter code is what makes something unique
     """
     curr1 = Currency(
         code="ABC",
         numeric="1000",
         name="ABC Currency",
-        symbol=u"$",
+        symbol="$",
         decimals=2,
-        countries=['My Country'])
+        countries=["My Country"],
+    )
 
     curr2 = Currency(
         code="ABC",
         numeric="1001",
         name="ABC Currency (Same numeric code)",
-        symbol=u"#",
+        symbol="#",
         decimals=1,
-        countries=['My Country 2'])
+        countries=["My Country 2"],
+    )
 
     assert curr1 == curr2
 
 
 def test_currency_inequality():
     """
-    The currency 3 letter code is what makes something unique
+    The currency 3-letter code is what makes something unique
     """
     curr1 = Currency(
         code="ABC",
         numeric="1000",
         name="My Currency",
-        symbol=u"$",
+        symbol="$",
         decimals=2,
-        countries=['My Country'])
+        countries=["My Country"],
+    )
 
     curr2 = Currency(
         code="BCD",
         numeric="1000",
         name="My Currency",
-        symbol=u"$",
+        symbol="$",
         decimals=2,
-        countries=['My Country'])
+        countries=["My Country"],
+    )
 
     assert curr1 != curr2
 
@@ -57,15 +61,16 @@ def test_currency_equality_against_string():
         code="ABC",
         numeric="1000",
         name="ABC Currency",
-        symbol=u"$",
+        symbol="$",
         decimals=2,
-        countries=['My Country'])
+        countries=["My Country"],
+    )
 
-    assert curr1 == 'ABC'
-    assert curr1 != 'DEF'
+    assert curr1 == "ABC"
+    assert curr1 != "DEF"
 
-    assert curr1 == u'ABC'
-    assert curr1 != u'DEF'
+    assert curr1 == "ABC"
+    assert curr1 != "DEF"
 
 
 def test_currency_equality_against_other():
@@ -76,8 +81,9 @@ def test_currency_equality_against_other():
         code="ABC",
         numeric="1000",
         name="ABC Currency",
-        symbol=u"$",
+        symbol="$",
         decimals=2,
-        countries=['My Country'])
+        countries=["My Country"],
+    )
 
     assert curr1 != 1000

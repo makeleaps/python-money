@@ -15,83 +15,83 @@ class SampleForm(forms.Form):
 class SampleModelForm(forms.ModelForm):
     class Meta:
         model = SimpleMoneyModel
-        fields = '__all__'
+        fields = "__all__"
 
         fields = (
-            'name',
-            'price',
+            "name",
+            "price",
         )
 
 
 def instance_view(request):
-    money = Money('0.0', 'JPY')
-    return render_to_response('view.html', {'money': money})
+    money = Money("0.0", "JPY")
+    return render_to_response("view.html", {"money": money})
 
 
 def model_view(request):
-    instance = SimpleMoneyModel(price=Money('0.0', 'JPY'))
+    instance = SimpleMoneyModel(price=Money("0.0", "JPY"))
     money = instance.price
-    return render_to_response('view.html', {'money': money})
+    return render_to_response("view.html", {"money": money})
 
 
-def model_from_db_view(request, amount='0', currency='XXX'):
+def model_from_db_view(request, amount="0", currency="XXX"):
     # db roundtrip
     instance = SimpleMoneyModel.objects.create(price=Money(amount, currency))
     instance = SimpleMoneyModel.objects.get(pk=instance.pk)
 
     money = instance.price
-    return render_to_response('view.html', {'money': money})
+    return render_to_response("view.html", {"money": money})
 
 
-def model_form_view(request, amount='0', currency='XXX'):
+def model_form_view(request, amount="0", currency="XXX"):
     cleaned_data = {}
-    if request.method == 'POST':
+    if request.method == "POST":
         form = SampleModelForm(request.POST)
         if form.is_valid():
             cleaned_data = form.cleaned_data
             form.save()
-            # Most views would redirect here but we continue so we can render the data
+            # Most views would redirect here, but we continue so we can render the data
     else:
-        form = SampleModelForm(initial={'price': Money(amount, currency)})
+        form = SampleModelForm(initial={"price": Money(amount, currency)})
 
-    return render_to_response('form.html', {'form': form, 'cleaned_data': cleaned_data})
+    return render_to_response("form.html", {"form": form, "cleaned_data": cleaned_data})
 
 
 def regular_form(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = SampleForm(request.POST)
 
         if form.is_valid():
-            price = form.cleaned_data['price']
-            return render_to_response('form.html', {'price': price})
+            price = form.cleaned_data["price"]
+            return render_to_response("form.html", {"price": price})
     else:
         form = SampleForm()
-    return render_to_response('form.html', {'form': form})
+    return render_to_response("form.html", {"form": form})
 
 
 def regular_form_edit(request, id):
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
-    if request.method == 'POST':
-        form = SampleForm(request.POST, initial={'price': instance.price})
-        form = SampleForm(request.POST, initial={'price': instance.price})
+    if request.method == "POST":
+        form = SampleForm(request.POST, initial={"price": instance.price})
+        form = SampleForm(request.POST, initial={"price": instance.price})
 
         if form.is_valid():
-            price = form.cleaned_data['price']
-            return render_to_response('form.html', {'price': price})
+            price = form.cleaned_data["price"]
+            return render_to_response("form.html", {"price": price})
     else:
-        form = SampleForm(initial={'price': instance.price})
-    return render_to_response('form.html', {'form': form})
+        form = SampleForm(initial={"price": instance.price})
+    return render_to_response("form.html", {"form": form})
 
 
 def model_form_edit(request, id):
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = SampleModelForm(request.POST, instance=instance)
 
         if form.is_valid():
-            price = form.cleaned_data['price']
+            price = form.cleaned_data["price"]
             form.save()
-            return render_to_response('form.html', {'price': price})
+            return render_to_response("form.html", {"price": price})
     else:
         form = SampleModelForm(instance=instance)
-    return render_to_response('form.html', {'form': form})
+    return render_to_response("form.html", {"form": form})

@@ -3,14 +3,17 @@ from django.db.models.query import QuerySet
 from django.utils.encoding import smart_text
 from .fields import currency_field_name
 
-__all__ = ('QuerysetWithMoney', 'MoneyManager',)
+__all__ = (
+    "QuerysetWithMoney",
+    "MoneyManager",
+)
 
 
 class QuerysetWithMoney(QuerySet):
-
     def _update_params(self, kwargs):
         from django.db.models.constants import LOOKUP_SEP
         from money.money import Money
+
         to_append = {}
         for name, value in kwargs.items():
             if isinstance(value, Money):
