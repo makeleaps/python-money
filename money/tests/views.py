@@ -12,7 +12,7 @@ class SampleForm(forms.Form):
     price = MoneyField()
 
 
-class SampleModelForm(forms.ModelForm):
+class SampleModelForm(forms.ModelForm[SimpleMoneyModel]):
     class Meta:
         model = SimpleMoneyModel
         fields = ("name", "price")
