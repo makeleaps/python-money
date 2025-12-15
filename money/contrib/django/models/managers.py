@@ -1,3 +1,5 @@
+from typing import Any, TypeVar
+
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
@@ -8,9 +10,11 @@ __all__ = (
     "MoneyManager",
 )
 
+T = TypeVar("T", bound=models.Model)
 
-class QuerysetWithMoney(QuerySet):
-    def _update_params(self, kwargs):
+
+class QuerysetWithMoney(QuerySet[T]):
+    def _update_params(self, kwargs: dict[str, Any]) -> dict[str, Any]:
         from django.db.models.constants import LOOKUP_SEP
         from money.money import Money
 
@@ -83,6 +87,6 @@ class QuerysetWithMoney(QuerySet):
         return super(QuerysetWithMoney, self).values(*args, **kwargs)
 
 
-class MoneyManager(models.Manager):
+class MoneyManager(models.Manager[T]):
     def get_queryset(self):
         return QuerysetWithMoney(self.model)

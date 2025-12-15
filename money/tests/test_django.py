@@ -20,7 +20,7 @@ from money.tests.models import (
 class MoneyFieldTestCase(TestCase):
     def assertSameCurrency(
         self, moneys: Iterable[Money], currency_code: Optional[str] = None
-    ):
+    ) -> None:
         """Utility function to assert a collection of currencies are all the same"""
         currency_codes = set([m.currency.code for m in moneys])
         self.assertTrue(len(currency_codes) == 1)

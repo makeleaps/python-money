@@ -205,8 +205,8 @@ class InvalidMoneyOperationTestCase(TestCase):
 
     def test_mutation_of_amount(self):
         with self.assertRaises(AttributeError):
-            Money(10, "JPY").amount = 3
+            Money(10, "JPY").amount = 3  # type: ignore[misc]
 
     def test_mutation_of_currency(self):
         with self.assertRaises(AttributeError):
-            Money(10, "JPY").currency = "USD"
+            Money(10, "JPY").currency = "USD"  # type: ignore[misc]

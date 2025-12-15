@@ -9,7 +9,7 @@ from money.money import Money
 __all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
 
 
-def currency_field_name(name):
+def currency_field_name(name: str) -> str:
     return "%s_currency" % name
 
 

@@ -15,11 +15,7 @@ class SampleForm(forms.Form):
 class SampleModelForm(forms.ModelForm):
     class Meta:
         model = SimpleMoneyModel
-
-        fields = (
-            "name",
-            "price",
-        )
+        fields = ("name", "price")
 
 
 def instance_view(request):

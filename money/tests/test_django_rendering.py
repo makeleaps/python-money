@@ -109,6 +109,7 @@ class TestEditView(TestCase):
 
         # Find the object we created...
         obj = SimpleMoneyModel.objects.last()
+        assert obj is not None
         self.assertEqual(str(obj.price), "JPY 555.5")
 
         self.assertContains(response, "|item:name|value:ABC|")

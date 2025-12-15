@@ -33,14 +33,14 @@ class Currency(object):
     def __repr__(self):
         return self.code
 
-    def __eq__(self, other):
+    def __eq__(self, other: Union["Currency", str]) -> bool:  # type: ignore[override]
         if isinstance(other, Currency):
-            return self.code and other.code and self.code == other.code
+            return bool(self.code and other.code and (self.code == other.code))
         if isinstance(other, str):
             return self.code == other
         return False
 
-    def __ne__(self, other):
+    def __ne__(self, other: Union["Currency", str]) -> bool:  # type: ignore[override]
         return not self.__eq__(other)
 
 
@@ -96,7 +96,7 @@ class Money(object):
     _currency: Currency
 
     @classmethod
-    def _from_string(cls, value):
+    def _from_string(cls, value: Union[str, int, float]) -> tuple[Decimal, Currency]:
         s = str(value).strip()
         try:
             amount = Decimal(s)
@@ -112,7 +112,7 @@ class Money(object):
         return amount, currency
 
     @classmethod
-    def from_string(cls, value) -> "Money":
+    def from_string(cls, value: str) -> "Money":
         """
         Parses a properly formatted string. The string should be formatted as
         given by the repr function: 'USD 123.45'
@@ -151,7 +151,7 @@ class Money(object):
                             )
                         )
 
-                    self._amount, currency = self._from_string(amount)
+                    self._amount, currency = self._from_string(amount or 0)
                 except:
                     raise IncorrectMoneyInputError(
                         "Cannot initialize with amount %s" % amount
@@ -257,7 +257,9 @@ class Money(object):
     # Comparison operators
     def __eq__(self, other: Optional[Union["Money", int, float]]) -> bool:  # type: ignore[override]
         if isinstance(other, Money):
-            return (self._amount == other.amount) and (self._currency == other.currency)
+            return bool(
+                (self._amount == other.amount) and (self._currency == other.currency)
+            )
         # Allow comparison to 0
         if (other == 0) and (self._amount == 0):
             return True
