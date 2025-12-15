@@ -17,6 +17,7 @@ RELEASE-VERSION
 *.komodoproject
 *.esproj
 *.pyc
+*.bak
 
 *.log
 *.sql

@@ -1,16 +1,39 @@
 [project]
 name = "python-money"
 version = "0.1.0"
-description = "Add your description here"
+description = "Primitives for working with money and currencies in Python"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
+license = {text = "BSD"}
+authors = [{name = "Paul Oswald", email = "pauloswald@gmail.com"}]
+keywords = ["money", "currency", "finance"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Office/Business :: Financial",
+]
+
 dependencies = [
     "django==4.0.10",
     "six>=1.17.0",
 ]
 
 [dependency-groups]
-test = [
-    "mypy>=1.11.0",
+dev = [
+    "mypy>=1.19.0",
     "ruff>=0.8.3",
 ]
+
+#[build-system]
+#requires = ["setuptools>=65.0", "wheel"]
+#build-backend = "setuptools.build_meta"
+#
+#[tool.setuptools.packages.find]
+#where = ["."]
+#include = ["money/*"]
+#
+#[tool.setuptools.package-data]
+#money = ["**/*"]
