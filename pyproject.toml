@@ -51,3 +51,6 @@ disable_error_code = ["operator"]
 
 [tool.django-stubs]
 django_settings_module = "money.tests.settings"
+
+[tool.setuptools.package-data]
+money = ["py.typed"]
