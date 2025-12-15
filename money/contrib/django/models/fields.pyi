@@ -1,9 +1,11 @@
 from typing import Any
 
 from django.db import models
+from django.db.models import Combinable
 
 from money.money import Money, Currency
 from django.utils.functional import _StrOrPromise
+from decimal import Decimal
 
 
 def currency_field_name(name: str) -> str: ...
@@ -12,13 +14,15 @@ def currency_field_name(name: str) -> str: ...
 class NotSupportedLookup(TypeError): ...
 
 
-class CurrencyField(models.DecimalField[str, str]): ...
+class CurrencyField(models.CharField[str, str]):
+    _pyi_private_set_type: str | int | Combinable | Currency  # type: ignore[assignment]
+    _pyi_private_get_type: str
 
 
 class MoneyField(models.DecimalField[Money, Money]):
-    _pyi_private_set_type: Money | int  # type: ignore[assignment]
+    _pyi_private_set_type: Money | Decimal | int  # type: ignore[assignment]
     _pyi_private_get_type: Money  # type: ignore[assignment]
-    _pyi_lookup_exact_type: Money | int  # type: ignore[assignment]
+    _pyi_lookup_exact_type: Money | Decimal | int  # type: ignore[assignment]
 
     max_digits: int
     decimal_places: int

@@ -44,7 +44,10 @@ dev = [
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
 strict = true
-disallow_untyped_defs = false  # Set to true once you add type hints
+
+[[tool.mypy.overrides]]
+module = "money.tests.test_money_operations"
+disable_error_code = ["operator"]
 
 [tool.django-stubs]
 django_settings_module = "money.tests.settings"

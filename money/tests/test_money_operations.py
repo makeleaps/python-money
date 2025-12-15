@@ -1,85 +1,48 @@
 from __future__ import division, unicode_literals
 
+from typing import Union, Callable, Optional
+
 import pytest
 from decimal import Decimal
 
 from money.money import Money, CurrencyMismatchException
 
 
-MONEY_STRINGS = [
+MONEY_STRINGS: list[tuple[Money, str]] = [
     # Undefined currency:
-    (
-        Money(" 123"),
-        "XXX 123",
-    ),
-    (
-        Money("-123"),
-        "XXX -123",
-    ),
+    (Money(" 123"), "XXX 123"),
+    (Money("-123"), "XXX -123"),
     # Test a currency with decimals:
-    (
-        Money(" 123", "USD"),
-        "USD 123",
-    ),
-    (
-        Money("-123", "USD"),
-        "USD -123",
-    ),
-    (
-        Money(" 123.0000", "USD"),
-        "USD 123.0000",
-    ),
-    (
-        Money("-123.0000", "USD"),
-        "USD -123.0000",
-    ),
-    (
-        Money(" 123.25", "USD"),
-        "USD 123.25",
-    ),
-    (
-        Money("-123.25", "USD"),
-        "USD -123.25",
-    ),
+    (Money(" 123", "USD"), "USD 123"),
+    (Money("-123", "USD"), "USD -123"),
+    (Money(" 123.0000", "USD"), "USD 123.0000"),
+    (Money("-123.0000", "USD"), "USD -123.0000"),
+    (Money(" 123.25", "USD"), "USD 123.25"),
+    (Money("-123.25", "USD"), "USD -123.25"),
     # Test a currency that is normally written without decimals:
-    (
-        Money(" 123", "JPY"),
-        "JPY 123",
-    ),
-    (
-        Money("-123", "JPY"),
-        "JPY -123",
-    ),
-    (
-        Money(" 123.0000", "JPY"),
-        "JPY 123.0000",
-    ),
-    (
-        Money("-123.0000", "JPY"),
-        "JPY -123.0000",
-    ),
-    (
-        Money(" 123.25", "JPY"),
-        "JPY 123.25",
-    ),
-    (
-        Money("-123.25", "JPY"),
-        "JPY -123.25",
-    ),
+    (Money(" 123", "JPY"), "JPY 123"),
+    (Money("-123", "JPY"), "JPY -123"),
+    (Money(" 123.0000", "JPY"), "JPY 123.0000"),
+    (Money("-123.0000", "JPY"), "JPY -123.0000"),
+    (Money(" 123.25", "JPY"), "JPY 123.25"),
+    (Money("-123.25", "JPY"), "JPY -123.25"),
 ]
 
 
 @pytest.mark.parametrize("value,expected", MONEY_STRINGS)
-def test_str(value, expected):
+def test_str(value: Money, expected: str) -> None:
     assert str(value) == expected
 
 
 @pytest.mark.parametrize("value,expected", MONEY_STRINGS)
-def test_repr(value, expected):
+def test_repr(value: Money, expected: str) -> None:
     assert repr(value) == expected
 
 
-MONEY_ARITHMETIC = [
+Value = Optional[Union[Money, Decimal, float, int]]
+ArithmeticFunc = Callable[[], Value]
+
+MONEY_ARITHMETIC: list[tuple[ArithmeticFunc, Value]] = [
     # Casting
     (lambda: Money("100") + 0.5, Money("100.5")),
     (lambda: float(Money("100")), float(100)),
@@ -102,7 +65,7 @@ MONEY_ARITHMETIC = [
     (lambda: Money("100") * 4, Money("400")),
     (lambda: Money("100") * Decimal("4"), Money("400")),
     # Division
-    (lambda: Money("100") / 4, Money("25")),
+    (lambda: Money("100") / 4, Money("25")),  # type: ignore[no-any-return]
     (lambda: Money("100") / Decimal("4"), Money("25")),
     # Negation
     (lambda: -Money("100"), Money("-100")),
@@ -112,17 +75,17 @@ MONEY_ARITHMETIC = [
 
 
 @pytest.mark.parametrize("value,expected", MONEY_ARITHMETIC)
-def test_arithmetic(value, expected):
+def test_arithmetic(value: ArithmeticFunc, expected: Value) -> None:
     result = value()
     assert result == expected
 
 
-MONEY_ARITHMETIC_UNSUPPORTED = [
+MONEY_ARITHMETIC_UNSUPPORTED: list[ArithmeticFunc] = [
     # Modulus
-    (lambda: 4 % Money("100")),  # type: ignore[operator]
-    (lambda: Decimal("4") % Money("100")),  # type: ignore[operator]
-    (lambda: Money("100") % 4),  # type: ignore[operator]
-    (lambda: Money("100") % Decimal("4")),  # type: ignore[operator]
+    (lambda: 4 % Money("100")),
+    (lambda: Decimal("4") % Money("100")),
+    (lambda: Money("100") % 4),
+    (lambda: Money("100") % Decimal("4")),
     # Division: floor division (see future import above)
     (lambda: Money("100") // 4),
     (lambda: Money("100") // Decimal("4")),
@@ -141,12 +104,12 @@ MONEY_ARITHMETIC_UNSUPPORTED = [
 
 
 @pytest.mark.parametrize("value", MONEY_ARITHMETIC_UNSUPPORTED)
-def test_invalid_arithmetic(value):
+def test_invalid_arithmetic(value: ArithmeticFunc) -> None:
     with pytest.raises(TypeError):
         value()
 
 
-MONEY_ARITHMETIC_MISMATCHED = [
+MONEY_ARITHMETIC_MISMATCHED: list[ArithmeticFunc] = [
     # Mismatched currencies
     (lambda: Money("100", "JPY") + Money("100", "EUR")),
     (lambda: Money("100", "JPY") - Money("100", "EUR")),
@@ -154,12 +117,12 @@ MONEY_ARITHMETIC_MISMATCHED = [
 
 
 @pytest.mark.parametrize("value", MONEY_ARITHMETIC_MISMATCHED)
-def test_invalid_currency(value):
+def test_invalid_currency(value: ArithmeticFunc) -> None:
     with pytest.raises(CurrencyMismatchException):
         value()
 
 
-MONEY_EQUALITY = [
+MONEY_EQUALITY: list[tuple[bool, bool]] = [
     # Bool
     (bool(Money("0")), False),
     (bool(Money("1")), True),
@@ -262,5 +225,5 @@ MONEY_EQUALITY = [
 
 
 @pytest.mark.parametrize("value,expected", MONEY_EQUALITY)
-def test_equality(value, expected):
+def test_equality(value: bool, expected: bool) -> None:
     assert value == expected

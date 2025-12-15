@@ -32,59 +32,59 @@ class QuerysetWithMoney(QuerySet[T]):
 
     def dates(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).dates(*args, **kwargs)
+        return super().dates(*args, **kwargs)
 
     def distinct(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).distinct(*args, **kwargs)
+        return super().distinct(*args, **kwargs)
 
     def extra(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).extra(*args, **kwargs)
+        return super().extra(*args, **kwargs)
 
     def get(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).get(*args, **kwargs)
+        return super().get(*args, **kwargs)
 
     def get_or_create(self, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).get_or_create(**kwargs)
+        return super().get_or_create(**kwargs)
 
     def filter(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).filter(*args, **kwargs)
+        return super().filter(*args, **kwargs)
 
     def complex_filter(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).complex_filter(*args, **kwargs)
+        return super().complex_filter(*args, **kwargs)
 
     def exclude(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).exclude(*args, **kwargs)
+        return super().exclude(*args, **kwargs)
 
     def in_bulk(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).in_bulk(*args, **kwargs)
+        return super().in_bulk(*args, **kwargs)
 
     def iterator(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).iterator(*args, **kwargs)
+        return super().iterator(*args, **kwargs)
 
     def latest(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).latest(*args, **kwargs)
+        return super().latest(*args, **kwargs)
 
     def order_by(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).order_by(*args, **kwargs)
+        return super().order_by(*args, **kwargs)
 
     def select_related(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).select_related(*args, **kwargs)
+        return super().select_related(*args, **kwargs)
 
     def values(self, *args, **kwargs):
         kwargs = self._update_params(kwargs)
-        return super(QuerysetWithMoney, self).values(*args, **kwargs)
+        return super().values(*args, **kwargs)
 
 
 class MoneyManager(models.Manager[T]):

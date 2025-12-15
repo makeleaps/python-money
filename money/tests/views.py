@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 from django import forms
+from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404
 
 from money.money import Money
@@ -18,18 +19,20 @@ class SampleModelForm(forms.ModelForm[SimpleMoneyModel]):
         fields = ("name", "price")
 
 
-def instance_view(request):
+def instance_view(request: HttpRequest) -> HttpResponse:
     money = Money("0.0", "JPY")
     return render(request, "view.html", {"money": money})
 
 
-def model_view(request):
+def model_view(request: HttpRequest) -> HttpResponse:
     instance = SimpleMoneyModel(price=Money("0.0", "JPY"))
     money = instance.price
     return render(request, "view.html", {"money": money})
 
 
-def model_from_db_view(request, amount="0", currency="XXX"):
+def model_from_db_view(
+    request: HttpRequest, amount: str = "0", currency: str = "XXX"
+) -> HttpResponse:
     # db roundtrip
     instance = SimpleMoneyModel.objects.create(price=Money(amount, currency))
     instance = SimpleMoneyModel.objects.get(pk=instance.pk)
@@ -38,7 +41,9 @@ def model_from_db_view(request, amount="0", currency="XXX"):
     return render(request, "view.html", {"money": money})
 
 
-def model_form_view(request, amount="0", currency="XXX"):
+def model_form_view(
+    request: HttpRequest, amount: str = "0", currency: str = "XXX"
+) -> HttpResponse:
     cleaned_data = {}
     if request.method == "POST":
         form = SampleModelForm(request.POST)
@@ -52,7 +57,7 @@ def model_form_view(request, amount="0", currency="XXX"):
     return render(request, "form.html", {"form": form, "cleaned_data": cleaned_data})
 
 
-def regular_form(request):
+def regular_form(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = SampleForm(request.POST)
 
@@ -64,7 +69,7 @@ def regular_form(request):
     return render(request, "form.html", {"form": form})
 
 
-def regular_form_edit(request, id):
+def regular_form_edit(request: HttpRequest, id: int) -> HttpResponse:
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == "POST":
         form = SampleForm(request.POST, initial={"price": instance.price})
@@ -78,7 +83,7 @@ def regular_form_edit(request, id):
     return render(request, "form.html", {"form": form})
 
 
-def model_form_edit(request, id):
+def model_form_edit(request: HttpRequest, id: int) -> HttpResponse:
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == "POST":
         form = SampleModelForm(request.POST, instance=instance)

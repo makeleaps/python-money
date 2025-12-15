@@ -20,10 +20,10 @@ from money.tests.views import (
 
 
 class TestView(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.client = Client()
 
-    def test_instance_view(self):
+    def test_instance_view(self) -> None:
         url = reverse(instance_view)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -32,7 +32,7 @@ class TestView(TestCase):
         self.assertContains(response, "money.amount|0.0|")
         self.assertContains(response, "money.currency|JPY|")
 
-    def test_model_view(self):
+    def test_model_view(self) -> None:
         url = reverse(model_view)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -45,7 +45,7 @@ class TestView(TestCase):
         "sqlite" in test_settings.DATABASES["default"]["ENGINE"],
         reason="SQLite can not represent 0.0 values",
     )
-    def test_model_from_db_view_zero_with_trailing_zeros(self):
+    def test_model_from_db_view_zero_with_trailing_zeros(self) -> None:
         url = reverse(model_from_db_view, kwargs={"amount": "0.0", "currency": "JPY"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -58,7 +58,7 @@ class TestView(TestCase):
         "sqlite" in test_settings.DATABASES["default"]["ENGINE"],
         reason="SQLite can not represent trailing zeros",
     )
-    def test_model_from_db_view_trailing_zeros(self):
+    def test_model_from_db_view_trailing_zeros(self) -> None:
         url = reverse(
             model_from_db_view, kwargs={"amount": "542.100", "currency": "JPY"}
         )
@@ -71,10 +71,10 @@ class TestView(TestCase):
 
 
 class TestEditView(TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.client = Client()
 
-    def test_form_GET(self):
+    def test_form_GET(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "987.00", "currency": "JPY"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -84,7 +84,7 @@ class TestEditView(TestCase):
             response, '<option value="JPY" selected="selected">JPY - Yen</option>'
         )
 
-    def test_form_GET_zero(self):
+    def test_form_GET_zero(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "0.0", "currency": "JPY"})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -94,7 +94,7 @@ class TestEditView(TestCase):
             response, '<option value="JPY" selected="selected">JPY - Yen</option>'
         )
 
-    def test_form_POST(self):
+    def test_form_POST(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "555.5", "currency": "JPY"})
 
         # We intentionally use decimals with a typically non-decimal currency

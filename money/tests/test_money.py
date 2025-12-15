@@ -11,14 +11,14 @@ from money.money import (
 )
 
 
-def test_string_parse():
+def test_string_parse() -> None:
     value = Money.from_string("USD 100.0")
     assert value.amount == Decimal("100.0")
     assert value.currency == "USD"
     assert value.currency == CURRENCY["USD"]
 
 
-def test_string_parse_default_currency():
+def test_string_parse_default_currency() -> None:
     value = Money.from_string("100.0")
     assert value.amount == Decimal("100.0")
     assert value.currency == "XXX"
@@ -30,7 +30,7 @@ class MoneyTestCase(TestCase):
     Tests of the Money class
     """
 
-    def test_creation(self):
+    def test_creation(self) -> None:
         """
         We should be able to create a money object with inputs
         similar to a Decimal type
@@ -59,7 +59,7 @@ class MoneyTestCase(TestCase):
         result = Money("-10.50", "USD")
         self.assertEqual(result.amount, Decimal("-10.50"))
 
-    def test_creation_unspecified_currency(self):
+    def test_creation_unspecified_currency(self) -> None:
         """
         Same thing as above but with the unspecified 'xxx' currency
         """
@@ -82,7 +82,7 @@ class MoneyTestCase(TestCase):
         result = Money("-10.50")
         self.assertEqual(result.amount, Decimal("-10.50"))
 
-    def test_creation_unspecified_amount(self):
+    def test_creation_unspecified_amount(self) -> None:
         """
         Same thing as above but with the unspecified 'xxx' currency
         """
@@ -91,14 +91,14 @@ class MoneyTestCase(TestCase):
         self.assertEqual(result.amount, 0)
         self.assertEqual(result.currency.code, "USD")
 
-    def test_creation_internal_types(self):
+    def test_creation_internal_types(self) -> None:
         curr = Currency(code="AAA", name="My Currency")
         result = Money(Decimal("777"), currency=curr)
         self.assertEqual(result.amount, Decimal("777"))
         self.assertEqual(result.currency.code, "AAA")
         self.assertEqual(result.currency.name, "My Currency")
 
-    def test_creation_parsed(self):
+    def test_creation_parsed(self) -> None:
         result = Money("XXX -10.50")
         self.assertEqual(result.amount, Decimal("-10.50"))
         self.assertEqual(result.currency.code, "XXX")
@@ -111,14 +111,14 @@ class MoneyTestCase(TestCase):
         self.assertEqual(result.amount, Decimal("-12.50"))
         self.assertEqual(result.currency.code, "JPY")
 
-    def test_creation_parsed_conflicting(self):
+    def test_creation_parsed_conflicting(self) -> None:
         # currency declaration two ways
         self.assertRaises(IncorrectMoneyInputError, lambda: Money("USD 123", "JPY"))
 
-    def test_creation_parsed_malformed(self):
+    def test_creation_parsed_malformed(self) -> None:
         self.assertRaises(IncorrectMoneyInputError, lambda: Money("USD 123 USD"))
 
-    def test_equality(self):
+    def test_equality(self) -> None:
         ten_bucks = Money(10, "USD")
         a_hamilton = Money(10, "USD")
 
@@ -137,23 +137,23 @@ class MoneyTestCase(TestCase):
         # But not different currencies
         self.assertFalse(ten_bucks == juu_en)
 
-    def test_subtraction(self):
+    def test_subtraction(self) -> None:
         result = Money(10, "USD") - Money(3, "USD")
         self.assertEqual(result, Money(7, "USD"))
         self.assertEqual(result.amount, Decimal("7"))
         self.assertEqual(result.currency, CURRENCY["USD"])
 
-    def test_negative_subtraction(self):
+    def test_negative_subtraction(self) -> None:
         result = Money(3, "USD") - Money(10, "USD")
         self.assertEqual(result, Money(-7, "USD"))
         self.assertEqual(result.amount, Decimal("-7"))
         self.assertEqual(result.currency, CURRENCY["USD"])
 
-    def test_amount_attribute(self):
+    def test_amount_attribute(self) -> None:
         value = Money(101, "USD")
         self.assertEqual(value.amount, 101)
 
-    def test_currency_attribute(self):
+    def test_currency_attribute(self) -> None:
         value = Money(101, "USD")
         self.assertEqual(value.currency, "USD")
         value = Money(101, "JPY")
@@ -170,43 +170,45 @@ class InvalidMoneyOperationTestCase(TestCase):
 
     """
 
-    def test_differing_currency_subtraction(self):
+    def test_differing_currency_subtraction(self) -> None:
         self.assertRaises(
             CurrencyMismatchException, lambda: Money(10, "JPY") - Money(3, "USD")
         )
 
-    def test_differing_currency_addition(self):
+    def test_differing_currency_addition(self) -> None:
         self.assertRaises(
             CurrencyMismatchException, lambda: Money(10, "JPY") + Money(3, "USD")
         )
 
-    def test_division_is_invalid(self):
+    def test_division_is_invalid(self) -> None:
         # Division of two currencies doesn't really make sense
         self.assertRaises(
-            InvalidOperationException, lambda: Money(10, "USD") / Money(3, "USD")
+            InvalidOperationException,
+            lambda: Money(10, "USD") / Money(3, "USD"),  # type: ignore[operator]
         )
 
-    def test_differing_currency_division(self):
+    def test_differing_currency_division(self) -> None:
         self.assertRaises(
-            InvalidOperationException, lambda: Money(10, "JPY") / Money(3, "USD")
+            InvalidOperationException,
+            lambda: Money(10, "JPY") / Money(3, "USD"),  # type: ignore[operator]
         )
 
-    def test_multiplication_is_invalid(self):
+    def test_multiplication_is_invalid(self) -> None:
         # Multiplication of two currencies doesn't really make sense
         self.assertRaises(
             InvalidOperationException, lambda: Money(10, "USD") * Money(3, "USD")
         )
 
-    def test_differing_currency_multiplication(self):
+    def test_differing_currency_multiplication(self) -> None:
         # Differing currencies should not matter
         self.assertRaises(
             InvalidOperationException, lambda: Money(10, "JPY") * Money(3, "USD")
         )
 
-    def test_mutation_of_amount(self):
+    def test_mutation_of_amount(self) -> None:
         with self.assertRaises(AttributeError):
-            Money(10, "JPY").amount = 3  # type: ignore[misc]
+            Money(10, "JPY").amount = 3  # type: ignore[misc, assignment]
 
-    def test_mutation_of_currency(self):
+    def test_mutation_of_currency(self) -> None:
         with self.assertRaises(AttributeError):
-            Money(10, "JPY").currency = "USD"  # type: ignore[misc]
+            Money(10, "JPY").currency = "USD"  # type: ignore[misc, assignment]

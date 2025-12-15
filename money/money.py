@@ -30,7 +30,7 @@ class Currency(object):
         self.decimals = decimals
         self.countries = countries
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.code
 
     def __eq__(self, other: Union["Currency", str]) -> bool:  # type: ignore[override]
@@ -59,6 +59,9 @@ class CurrencyMismatchException(ArithmeticError):
 
 class InvalidOperationException(TypeError):
     """Raised when an operation is never allowed"""
+
+
+CompareWithMoney = Union["Money", Decimal, int, float, str]
 
 
 class Money(object):
@@ -169,32 +172,32 @@ class Money(object):
         assert isinstance(self._currency, Currency)
 
     @property
-    def amount(self):
+    def amount(self) -> Decimal:
         return self._amount
 
     @property
-    def currency(self):
+    def currency(self) -> Currency:
         return self._currency
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{} {}".format(self._currency, self._amount)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __float__(self):
+    def __float__(self) -> float:
         return float(self._amount)
 
-    def __int__(self):
+    def __int__(self) -> int:
         return int(self._amount)
 
-    def __pos__(self):
+    def __pos__(self) -> "Money":
         return Money(amount=self._amount, currency=self._currency)
 
-    def __neg__(self):
+    def __neg__(self) -> "Money":
         return Money(amount=-self._amount, currency=self._currency)
 
-    def __add__(self, other):
+    def __add__(self, other: CompareWithMoney) -> "Money":
         if isinstance(other, Money):
             self._currency_check(other)
             return Money(amount=self._amount + other.amount, currency=self._currency)
@@ -203,7 +206,7 @@ class Money(object):
                 amount=self._amount + Decimal(str(other)), currency=self._currency
             )
 
-    def __sub__(self, other):
+    def __sub__(self, other: CompareWithMoney) -> "Money":
         if isinstance(other, Money):
             self._currency_check(other)
             return Money(amount=self._amount - other.amount, currency=self._currency)
@@ -212,18 +215,18 @@ class Money(object):
                 amount=self._amount - Decimal(str(other)), currency=self._currency
             )
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: CompareWithMoney) -> None:
         # In the case where both values are Money, the left hand one will be
         # called. In the case where we are subtracting Money from another
         # value, we want to disallow it
         raise TypeError("Cannot subtract Money from %r" % other)
 
-    def __mul__(self, other):
+    def __mul__(self, other: CompareWithMoney) -> "Money":
         if isinstance(other, Money):
             raise InvalidOperationException("Cannot multiply monetary quantities")
         return Money(amount=self._amount * Decimal(str(other)), currency=self._currency)
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Decimal) -> "Money":
         """
         We allow division by non-money numeric values but dividing by
         another Money value is undefined
@@ -234,12 +237,12 @@ class Money(object):
 
     __div__ = __truediv__
 
-    def __floordiv__(self, other):
+    def __floordiv__(self, other: CompareWithMoney) -> None:
         raise InvalidOperationException(
             "Floor division not supported for monetary quantities"
         )
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: CompareWithMoney) -> None:
         raise InvalidOperationException("Cannot divide by monetary quantities")
 
     __rdiv__ = __rtruediv__
@@ -249,13 +252,13 @@ class Money(object):
     __rmul__ = __mul__
 
     # Boolean
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return self._amount != 0
 
     __nonzero__ = __bool__
 
     # Comparison operators
-    def __eq__(self, other: Optional[Union["Money", int, float]]) -> bool:  # type: ignore[override]
+    def __eq__(self, other: CompareWithMoney) -> bool:  # type: ignore[override]
         if isinstance(other, Money):
             return bool(
                 (self._amount == other.amount) and (self._currency == other.currency)
@@ -265,27 +268,27 @@ class Money(object):
             return True
         return False
 
-    def __ne__(self, other):
+    def __ne__(self, other: CompareWithMoney) -> bool:  # type: ignore[override]
         return not self.__eq__(other)
 
-    def __lt__(self, other):
+    def __lt__(self, other: CompareWithMoney) -> bool:
         if isinstance(other, Money):
             self._currency_check(other)
             return self._amount < other.amount
         else:
             return self._amount < Decimal(str(other))
 
-    def __gt__(self, other):
+    def __gt__(self, other: CompareWithMoney) -> bool:
         if isinstance(other, Money):
             self._currency_check(other)
             return self._amount > other.amount
         else:
             return self._amount > Decimal(str(other))
 
-    def __le__(self, other):
+    def __le__(self, other: CompareWithMoney) -> bool:
         return self < other or self == other
 
-    def __ge__(self, other):
+    def __ge__(self, other: CompareWithMoney) -> bool:
         return self > other or self == other
 
 

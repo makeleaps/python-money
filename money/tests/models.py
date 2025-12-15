@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from typing import Union
 
 from django.db import models
 
@@ -15,7 +16,7 @@ class SimpleMoneyModel(models.Model):
     price = fields.MoneyField(max_digits=12, decimal_places=3)
     price_currency: fields.CurrencyField
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name + " " + str(self.price)
 
     class Meta:
@@ -32,7 +33,7 @@ class MoneyModelDefaultMoneyUSD(models.Model):
     zero = fields.MoneyField(max_digits=12, decimal_places=3, default=Money("0", "USD"))
     zero_currency: fields.CurrencyField
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name + " " + str(self.price)
 
     class Meta:
@@ -55,7 +56,7 @@ class MoneyModelDefaults(models.Model):
     )
     zero_currency: fields.CurrencyField
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name + " " + str(self.price)
 
     class Meta:
@@ -68,7 +69,7 @@ class NullableMoneyModel(models.Model):
     price = fields.MoneyField(max_digits=12, decimal_places=3, null=True)
     price_currency: fields.CurrencyField
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name + " " + str(self.price)
 
     class Meta:
@@ -83,7 +84,7 @@ class ParametrizedModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=123)
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("123", "XXX")
 
 
@@ -93,7 +94,7 @@ class ParametrizedDefaultAsZeroMoneyModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=Money(0, "JPY"))
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("0", "JPY")
 
 
@@ -105,7 +106,7 @@ class ParametrizedDefaultAsMoneyModel(models.Model):
     )
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("100", "JPY")
 
 
@@ -115,7 +116,7 @@ class ParametrizedDefaultAsZeroModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=0)
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("0", "XXX")
 
 
@@ -125,7 +126,7 @@ class ParametrizedDefaultAsValueModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=100)
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("100", "XXX")
 
 
@@ -137,7 +138,7 @@ class ParametrizedDefaultAsValueWithCurrencyModel(models.Model):
     )
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("0", "JPY")
 
 
@@ -149,11 +150,21 @@ class ParametrizedDefaultAsValueWithCurrencyAndLabelModel(models.Model):
     )
     value_currency: fields.CurrencyField
 
-    def expected_value(self):
+    def expected_value(self) -> Money:
         return Money("0", "JPY")
 
 
-ALL_PARAMETRIZED_MODELS = [
+ParametrizedModelType = Union[
+    type[ParametrizedModel],
+    type[ParametrizedDefaultAsZeroMoneyModel],
+    type[ParametrizedDefaultAsMoneyModel],
+    type[ParametrizedDefaultAsZeroModel],
+    type[ParametrizedDefaultAsValueModel],
+    type[ParametrizedDefaultAsValueWithCurrencyModel],
+    type[ParametrizedDefaultAsValueWithCurrencyAndLabelModel],
+]
+
+ALL_PARAMETRIZED_MODELS: list[ParametrizedModelType] = [
     ParametrizedModel,
     ParametrizedDefaultAsZeroMoneyModel,
     ParametrizedDefaultAsMoneyModel,

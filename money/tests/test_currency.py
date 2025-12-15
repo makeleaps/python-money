@@ -3,7 +3,7 @@ from money.money import (
 )
 
 
-def test_currency_equality():
+def test_currency_equality() -> None:
     """
     The currency 3-letter code is what makes something unique
     """
@@ -28,7 +28,7 @@ def test_currency_equality():
     assert curr1 == curr2
 
 
-def test_currency_inequality():
+def test_currency_inequality() -> None:
     """
     The currency 3-letter code is what makes something unique
     """
@@ -53,7 +53,7 @@ def test_currency_inequality():
     assert curr1 != curr2
 
 
-def test_currency_equality_against_string():
+def test_currency_equality_against_string() -> None:
     """
     The currency can be compared to a string
     """
@@ -73,7 +73,7 @@ def test_currency_equality_against_string():
     assert curr1 != "DEF"
 
 
-def test_currency_equality_against_other():
+def test_currency_equality_against_other() -> None:
     """
     The currency can't (currently) be compared to something else...
     """
