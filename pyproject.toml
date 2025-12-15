@@ -23,8 +23,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "mypy>=1.19.0",
-    "ruff>=0.8.3",
+    "ruff==0.7.0",
+    "django-stubs[compatible-mypy]>=4.2.0",
+    "mypy>=1.6.1",
+    "psycopg2==2.9.9",
 ]
 
 #[build-system]
@@ -37,3 +39,11 @@ dev = [
 #
 #[tool.setuptools.package-data]
 #money = ["**/*"]
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+strict = true
+disallow_untyped_defs = false  # Set to true once you add type hints
+
+[tool.django-stubs]
+django_settings_module = "money.tests.settings"
