@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from django.db import models
 from django.db.models import Combinable
@@ -19,10 +19,27 @@ class CurrencyField(models.CharField[str, str]):
     _pyi_private_get_type: str
 
 
+class MoneyFieldProxy:
+    field: Any = ...
+    amount_field_name: str = ...
+    currency_field_name: str = ...
+
+    def __init__(self, field: "MoneyField") -> None: ...
+    def _get_values(
+        self, obj: models.Model
+    ) -> tuple[Optional[Decimal], Optional[str]]: ...
+
+    def _set_values(
+        self, obj: models.Model, amount: Optional[Decimal], currency: Optional[str]
+    ) -> None: ...
+
+
 class MoneyField(models.DecimalField[Money, Money]):
     _pyi_private_set_type: Money | Decimal | int  # type: ignore[assignment]
     _pyi_private_get_type: Money  # type: ignore[assignment]
     _pyi_lookup_exact_type: Money | Decimal | int  # type: ignore[assignment]
+
+    currency_field_name: str
 
     max_digits: int
     decimal_places: int

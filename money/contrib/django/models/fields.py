@@ -1,10 +1,11 @@
 from decimal import Decimal
+from typing import Optional, Union
 
 from django.db import models
 from django.utils.translation import gettext_lazy
 
 from money.contrib.django import forms
-from money.money import Money
+from money.money import Money, Currency
 
 __all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
 
@@ -44,22 +45,27 @@ class MoneyFieldProxy(object):
     See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
     """
 
-    def __init__(self, field):
-        self.field = field
-        self.amount_field_name = field.name
-        self.currency_field_name = currency_field_name(field.name)
+    def __init__(self, field: "MoneyField"):
+        self.field: "MoneyField" = field
+        self.amount_field_name: str = field.name
+        self.currency_field_name: str = field.currency_field_name
 
-    def _get_values(self, obj):
+    def _get_values(self, obj: models.Model) -> tuple[Optional[Decimal], Optional[str]]:
         return (
             obj.__dict__.get(self.field.amount_field_name, None),
             obj.__dict__.get(self.field.currency_field_name, None),
         )
 
-    def _set_values(self, obj, amount, currency):
+    def _set_values(
+        self,
+        obj: models.Model,
+        amount: Optional[Decimal],
+        currency: Optional[Union[str, Currency]],
+    ) -> None:
         obj.__dict__[self.field.amount_field_name] = amount
         obj.__dict__[self.field.currency_field_name] = currency
 
-    def __get__(self, obj, *args):
+    def __get__(self, obj: models.Model, *args):
         if obj is None:
             return self
         amount, currency = self._get_values(obj)
@@ -67,7 +73,7 @@ class MoneyFieldProxy(object):
             return None
         return Money(amount, currency)
 
-    def __set__(self, obj, value):
+    def __set__(self, obj: models.Model, value):
         if value is None:  # Money(0) is False
             self._set_values(obj, None, "")
         elif isinstance(value, Money):
@@ -136,6 +142,7 @@ class CurrencyField(models.CharField):
 
 class MoneyField(InfiniteDecimalField):
     description = gettext_lazy("An amount and type of currency")
+    currency_field_name: str
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
