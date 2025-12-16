@@ -65,7 +65,7 @@ MONEY_ARITHMETIC: list[tuple[ArithmeticFunc, Value]] = [
     (lambda: Money("100") * 4, Money("400")),
     (lambda: Money("100") * Decimal("4"), Money("400")),
     # Division
-    (lambda: Money("100") / 4, Money("25")),  # type: ignore[no-any-return]
+    (lambda: Money("100") / 4, Money("25")),
     (lambda: Money("100") / Decimal("4"), Money("25")),
     # Negation
     (lambda: -Money("100"), Money("-100")),

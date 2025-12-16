@@ -226,7 +226,7 @@ class Money(object):
             raise InvalidOperationException("Cannot multiply monetary quantities")
         return Money(amount=self._amount * Decimal(str(other)), currency=self._currency)
 
-    def __truediv__(self, other: Decimal) -> "Money":
+    def __truediv__(self, other: Union[int, Decimal]) -> "Money":
         """
         We allow division by non-money numeric values but dividing by
         another Money value is undefined
