@@ -16,5 +16,5 @@ class CurrencySelectWidget(forms.MultiWidget):
     def decompress(self, value):
         try:
             return [value.amount, value.currency]
-        except:
+        except:  # noqa: E722
             return [None, None]

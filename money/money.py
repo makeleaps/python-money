@@ -104,11 +104,11 @@ class Money(object):
         try:
             amount = Decimal(s)
             currency = DEFAULT_CURRENCY
-        except:
+        except:  # noqa: E722
             try:
                 currency = CURRENCY[s[:3].upper()]
                 amount = Decimal(s[3:].strip())
-            except:
+            except:  # noqa: E722
                 raise IncorrectMoneyInputError(
                     "The value '%s' is not properly formatted as 'XXX 123.45' " % s
                 )
@@ -139,7 +139,7 @@ class Money(object):
         else:
             try:
                 self._amount = Decimal(amount or 0)
-            except:
+            except:  # noqa: E722
                 # Decimal couldn't initialize it
                 try:
                     # check for the odd case of Money("USD 123.00", "JPY")
@@ -155,7 +155,7 @@ class Money(object):
                         )
 
                     self._amount, currency = self._from_string(amount or 0)
-                except:
+                except:  # noqa: E722
                     raise IncorrectMoneyInputError(
                         "Cannot initialize with amount %s" % amount
                     )

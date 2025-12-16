@@ -89,7 +89,7 @@ def call_git_describe(
         # This can happen if "No tags can describe" the SHA. We'll use 'line'
         # which should now be the sha due to the --always flag
         return None, "0", line
-    except:
+    except:  # noqa: E722
         # Unknown error. Not a git repo?
         return (None, None, None)
 
@@ -105,7 +105,7 @@ def read_release_version() -> Optional[str]:
         finally:
             f.close()
 
-    except:
+    except:  # noqa: E722
         return None
 
 
