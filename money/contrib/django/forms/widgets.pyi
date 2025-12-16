@@ -6,7 +6,6 @@ from django.db.models.fields import _FieldChoices
 
 _OptAttrs: TypeAlias = dict[str, Any]
 
-
 class CurrencySelectWidget(forms.MultiWidget):
     def __init__(
         self,

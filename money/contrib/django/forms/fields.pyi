@@ -6,7 +6,6 @@ from django.utils.functional import _StrOrPromise
 from django.db.models.fields import _ErrorMessagesT, _ChoicesCallable, _FieldChoices
 from django.core.validators import _ValidatorCallable
 
-
 class MoneyField(forms.MultiValueField):
     def __init__(
         self,
