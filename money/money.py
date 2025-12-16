@@ -258,7 +258,7 @@ class Money(object):
     __nonzero__ = __bool__
 
     # Comparison operators
-    def __eq__(self, other: CompareWithMoney) -> bool:  # type: ignore[override]
+    def __eq__(self, other: Optional[CompareWithMoney]) -> bool:  # type: ignore[override]
         if isinstance(other, Money):
             return bool(
                 (self._amount == other.amount) and (self._currency == other.currency)
@@ -268,7 +268,7 @@ class Money(object):
             return True
         return False
 
-    def __ne__(self, other: CompareWithMoney) -> bool:  # type: ignore[override]
+    def __ne__(self, other: Optional[CompareWithMoney]) -> bool:  # type: ignore[override]
         return not self.__eq__(other)
 
     def __lt__(self, other: CompareWithMoney) -> bool:
