@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, TypeVar, Generic
 
 from django.db import models
 from django.db.models import Combinable
@@ -19,12 +19,15 @@ class CurrencyField(models.CharField[str, str]):
     _pyi_private_get_type: str
 
 
-class MoneyFieldProxy:
-    field: Any = ...
+F = TypeVar("F", bound="MoneyField")
+
+
+class MoneyFieldProxy(Generic[F]):
+    field: F = ...
     amount_field_name: str = ...
     currency_field_name: str = ...
 
-    def __init__(self, field: "MoneyField") -> None: ...
+    def __init__(self, field: F) -> None: ...
     def _get_values(
         self, obj: models.Model
     ) -> tuple[Optional[Decimal], Optional[str]]: ...
