@@ -26,7 +26,6 @@ dev = [
     "django-stubs[compatible-mypy]==4.2.0",
     "mypy>=1.2.0,<1.3",
     "psycopg2==2.9.9",
-    "types-six>=1.17.0.20251009",
     "pytest>=8.4.2",
 ]
 
