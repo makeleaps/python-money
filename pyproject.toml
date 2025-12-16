@@ -30,17 +30,6 @@ dev = [
     "pytest>=8.4.2",
 ]
 
-#[build-system]
-#requires = ["setuptools>=65.0", "wheel"]
-#build-backend = "setuptools.build_meta"
-#
-#[tool.setuptools.packages.find]
-#where = ["."]
-#include = ["money/*"]
-#
-#[tool.setuptools.package-data]
-#money = ["**/*"]
-
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
 strict = true
