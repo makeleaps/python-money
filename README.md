@@ -7,7 +7,7 @@ Compatibility
 =============
 
 This fork of python-money (rooted at poswald/python-money) is significantly
-different than other versions in the family tree. If you plan on using it,
+different from other versions in the family tree. If you plan on using it,
 please be aware that it most likely won't be a drop-in replacement.
 
 We have made several changes to be more conservative about operations,
@@ -24,13 +24,13 @@ You can install this project directly from the git repository using pip:
 
     $ pip install -e git+http://github.com/poswald/python-money.git@0.0.1#egg=python-money
 
-You do not have to specify the version number but it might be a good idea.
+You do not have to specify the version number, but it might be a good idea.
 
 Usage
 =====
 
 This application contains several classes and functions that make dealing with
-money easier and less error prone.
+money easier and less error-prone.
 
 ### Currency Types
 
@@ -112,7 +112,7 @@ currencies to each other, but it is safe to compare a currency to the value `0`.
 Comparing two differing currencies is undefined and will raise
 a `money.CurrencyMismatchException`. Prior versions of this project would do an
 implicit conversion to a 'base' currency using a defined conversion rate and
-perform the operation. We believe this is unexpected behavior and it is better
+perform the operation. We believe this is unexpected behavior, and it is better
 to let the user do that conversion themselves for the cases where they know they
 are comparing differing currencies.
 
@@ -176,9 +176,8 @@ the Django DecimalField:
         price = MoneyField(default=0, max_digits=12, decimal_places=2)
         ...
 
-Now run `./manage.py dbsync` or South migrate. Your database table will contain a
-field for holding the value and a second field for the currency type. In
-PostgreSQL it might look like this:
+Now run `./manage.py dbsync` or South migrate. Your database table will contain a field for holding the value and a second field for the currency type.
+In PostgreSQL, it might look like this:
 
     price          | numeric(12,2)          | not null default NULL::numeric
     price_currency | character varying(3)   | not null

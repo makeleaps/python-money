@@ -50,10 +50,14 @@ from __future__ import print_function, unicode_literals
 
 from subprocess import Popen, PIPE
 
-__all__ = ("get_git_version")
+__all__ = "get_git_version"
+
+from typing import Optional
 
 
-def call_git_describe(abbrev=5):
+def call_git_describe(
+    abbrev: int = 5,
+) -> tuple[Optional[str], Optional[str], Optional[str]]:
     """
     The `git describe --long` command outputs in the format of:
 
@@ -66,26 +70,31 @@ def call_git_describe(abbrev=5):
     """
     try:
         p = Popen(
-            ['git', 'describe', '--long', '--tags', '--always', '--abbrev=%d' % abbrev],
+            ["git", "describe", "--long", "--tags", "--always", "--abbrev=%d" % abbrev],
             stdout=PIPE,
             stderr=PIPE,
-            encoding='utf-8',
+            encoding="utf-8",
         )
-        p.stderr.close()
-        line = p.stdout.readlines()[0].strip()
+        stderr = p.stderr
+        assert stderr is not None
+        stderr.close()
 
-        tag, count, sha = line.split('-')
+        stdout = p.stdout
+        assert stdout is not None
+        line = stdout.readlines()[0].strip()
+
+        tag, count, sha = line.split("-")
         return tag, count, sha
     except ValueError:
         # This can happen if "No tags can describe" the SHA. We'll use 'line'
         # which should now be the sha due to the --always flag
-        return None, '0', line
-    except:
+        return None, "0", line
+    except:  # noqa: E722
         # Unknown error. Not a git repo?
         return (None, None, None)
 
 
-def read_release_version():
+def read_release_version() -> Optional[str]:
     try:
         f = open("RELEASE-VERSION", "r")
 
@@ -96,17 +105,17 @@ def read_release_version():
         finally:
             f.close()
 
-    except:
+    except:  # noqa: E722
         return None
 
 
-def write_release_version(version):
+def write_release_version(version: str) -> None:
     f = open("RELEASE-VERSION", "w")
     f.write("%s\n" % version)
     f.close()
 
 
-def get_git_version(abbrev=4):
+def get_git_version(abbrev: int = 4) -> Optional[str]:
     """
     Returns this project's version number based on the git repo's tags or from
     the RELEASE-VERSION file if this is a packaged release without a .git
@@ -127,7 +136,8 @@ def get_git_version(abbrev=4):
     # First try to get the current version using "git describe".
     tag, count, _ = call_git_describe(abbrev)
 
-    if count == '0':
+    version: Optional[str]
+    if count == "0":
         if tag:
             # Normal tagged release
             version = tag
@@ -144,16 +154,17 @@ def get_git_version(abbrev=4):
 
     # If the current version is different from what's in the
     # RELEASE-VERSION file, update the file to be current.
-    if version != release_version:
+    if version and version != release_version:
         write_release_version(version)
 
     # Finally, return the current version.
     return version
 
 
-def get_git_hash():
+def get_git_hash() -> Optional[str]:
     _, _, sha = call_git_describe()
     return sha
+
 
 if __name__ == "__main__":
     print(get_git_version())

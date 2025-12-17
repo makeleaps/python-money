@@ -1,3 +1,5 @@
+.venv
+.idea
 .coverage
 coverage.xml
 htmlcov
@@ -9,13 +11,13 @@ include
 lib
 .Python
 RELEASE-VERSION
-dist
 *.egg-info
 *.egg
 *.eggs
 *.komodoproject
 *.esproj
 *.pyc
+*.bak
 
 *.log
 *.sql

@@ -1,15 +1,16 @@
 from decimal import Decimal
+from typing import Optional, Union
 
 from django.db import models
 from django.utils.translation import gettext_lazy
 
 from money.contrib.django import forms
-from money.money import Money
+from money.money import Money, Currency
 
-__all__ = ('MoneyField', 'currency_field_name', 'NotSupportedLookup')
+__all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
 
 
-def currency_field_name(name):
+def currency_field_name(name: str) -> str:
     return "%s_currency" % name
 
 
@@ -17,7 +18,7 @@ def currency_field_db_column(db_column):
     return None if db_column is None else "%s_currency" % db_column
 
 
-SUPPORTED_LOOKUPS = ('exact', 'lt', 'gt', 'lte', 'gte', 'isnull')
+SUPPORTED_LOOKUPS = ("exact", "lt", "gt", "lte", "gte", "isnull")
 
 
 class NotSupportedLookup(TypeError):
@@ -44,20 +45,27 @@ class MoneyFieldProxy(object):
     See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
     """
 
-    def __init__(self, field):
-        self.field = field
-        self.amount_field_name = field.name
-        self.currency_field_name = currency_field_name(field.name)
+    def __init__(self, field: "MoneyField"):
+        self.field: "MoneyField" = field
+        self.amount_field_name: str = field.name
+        self.currency_field_name: str = field.currency_field_name
 
-    def _get_values(self, obj):
-        return (obj.__dict__.get(self.field.amount_field_name, None),
-                obj.__dict__.get(self.field.currency_field_name, None))
+    def _get_values(self, obj: models.Model) -> tuple[Optional[Decimal], Optional[str]]:
+        return (
+            obj.__dict__.get(self.field.amount_field_name, None),
+            obj.__dict__.get(self.field.currency_field_name, None),
+        )
 
-    def _set_values(self, obj, amount, currency):
+    def _set_values(
+        self,
+        obj: models.Model,
+        amount: Optional[Decimal],
+        currency: Optional[Union[str, Currency]],
+    ) -> None:
         obj.__dict__[self.field.amount_field_name] = amount
         obj.__dict__[self.field.currency_field_name] = currency
 
-    def __get__(self, obj, *args):
+    def __get__(self, obj: models.Model, *args):
         if obj is None:
             return self
         amount, currency = self._get_values(obj)
@@ -65,9 +73,9 @@ class MoneyFieldProxy(object):
             return None
         return Money(amount, currency)
 
-    def __set__(self, obj, value):
+    def __set__(self, obj: models.Model, value):
         if value is None:  # Money(0) is False
-            self._set_values(obj, None, '')
+            self._set_values(obj, None, "")
         elif isinstance(value, Money):
             self._set_values(obj, value.amount, value.currency.code)
         elif isinstance(value, Decimal):
@@ -93,10 +101,10 @@ class MoneyFieldProxy(object):
 
 class InfiniteDecimalField(models.DecimalField):
     def db_type(self, connection):
-        engine = connection.settings_dict['ENGINE']
+        engine = connection.settings_dict["ENGINE"]
 
-        if 'postgresql' in engine:
-            return 'numeric'
+        if "postgresql" in engine:
+            return "numeric"
 
         return super(InfiniteDecimalField, self).db_type(connection=connection)
 
@@ -133,7 +141,8 @@ class CurrencyField(models.CharField):
 
 
 class MoneyField(InfiniteDecimalField):
-    description = gettext_lazy('An amount and type of currency')
+    description = gettext_lazy("An amount and type of currency")
+    currency_field_name: str
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
@@ -141,23 +150,23 @@ class MoneyField(InfiniteDecimalField):
 
     def __init__(self, *args, **kwargs):
         # We add the currency field except when using frozen south orm. See introspection rules below.
-        default_currency = kwargs.pop("default_currency", '')
+        default_currency = kwargs.pop("default_currency", "")
         default = kwargs.get("default", None)
-        self.add_currency_field = not kwargs.pop('no_currency_field', False)
+        self.add_currency_field = not kwargs.pop("no_currency_field", False)
 
-        self.blankable = kwargs.get('blank', False)
+        self.blankable = kwargs.get("blank", False)
 
         if isinstance(default, Money):
             self.default_currency = default.currency  # use the default's currency
-            kwargs['default'] = default.amount
+            kwargs["default"] = default.amount
         else:
-            self.default_currency = default_currency or ''  # use the kwarg passed in
+            self.default_currency = default_currency or ""  # use the kwarg passed in
 
         super(MoneyField, self).__init__(*args, **kwargs)
 
     def deconstruct(self):
         name, path, args, kwargs = super(MoneyField, self).deconstruct()
-        kwargs['no_currency_field'] = True
+        kwargs["no_currency_field"] = True
         return name, path, args, kwargs
 
     # Implementing to_python should not be needed because we are directly
@@ -165,7 +174,7 @@ class MoneyField(InfiniteDecimalField):
     # of the model forms code still tries to call to_python on the field
     # directly which will coerce the Money value into a string
     # representation. To handle this, we're checking for string and seeing if
-    # we can split it into two pieces. Otherwise we assume we're dealing with
+    # we can split it into two pieces. Otherwise, we assume we're dealing with
     # a string value
     def to_python(self, value):
         if isinstance(value, str):
@@ -203,9 +212,10 @@ class MoneyField(InfiniteDecimalField):
         setattr(cls, self.name, MoneyFieldProxy(self))
 
         # Set our custom manager
-        if not hasattr(cls, '_default_manager'):
+        if not hasattr(cls, "_default_manager"):
             from .managers import MoneyManager
-            cls.add_to_class('objects', MoneyManager())
+
+            cls.add_to_class("objects", MoneyManager())
 
     def get_db_prep_save(self, value, *args, **kwargs):
         """
@@ -220,6 +230,7 @@ class MoneyField(InfiniteDecimalField):
 
         return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
 
+    # TODO: NOT SUPPORTED IN DJANGO 4.0
     def get_prep_lookup(self, lookup_type, value):
         """
         Prepares the value for passing to the database when used in a lookup
@@ -254,7 +265,7 @@ class MoneyField(InfiniteDecimalField):
         return value.amount
 
     def formfield(self, **kwargs):
-        defaults = {'form_class': forms.MoneyField}
+        defaults = {"form_class": forms.MoneyField}
         defaults.update(kwargs)
         return super(MoneyField, self).formfield(**defaults)
 
@@ -263,33 +274,3 @@ class MoneyField(InfiniteDecimalField):
         # Hack around the fact that we inherit from DecimalField but don't hold
         # Decimals. The real fix is to stop inheriting from DecimalField.
         return []
-
-
-# South introspection rules
-# (see http://south.aeracode.org/docs/customfields.html#extending-introspection)
-try:
-    from south.modelsinspector import add_introspection_rules
-    # South must know if a field was dynamically added to the class when it freezes it. We pass
-    # this in as a parameter to the field when it is created. The 'add_currency_field' attribute
-    # is normally True in a MoneyField. This means that 'no_currency_field' is True when frozen.
-    #
-    # See: http://south.aeracode.org/ticket/327
-    # See: https://bitbucket.org/carljm/django-markitup/changeset/eb788c807dd8
-    # See: http://south.aeracode.org/docs/customfields.html
-    add_introspection_rules(
-        patterns=[r"^money\.contrib\.django.\models\.fields\.MoneyField"],
-        rules=[
-            (
-                (MoneyField,),
-                [],
-                {'no_currency_field': ('add_currency_field', {})}
-            )
-        ]
-    )
-    add_introspection_rules(
-        patterns=[r"^money\.contrib\.django.\models\.fields\.CurrencyField"],
-        rules=[]
-    )
-except ImportError:
-    # South isn't installed
-    pass
