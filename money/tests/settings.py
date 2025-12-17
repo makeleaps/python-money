@@ -9,16 +9,16 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(TEST_DIR, "static")
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': ':memory:',
-    # },
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "money",
-        "USER": "",
-        "PASSWORD": "",
-    }
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": ":memory:",
+    },
+    # "default": {
+    #     "ENGINE": "django.db.backends.postgresql",
+    #     "NAME": "money",
+    #     "USER": "",
+    #     "PASSWORD": "",
+    # }
 }
 
 
@@ -34,6 +34,8 @@ elif os.environ.get("SNAP_CI"):
 
 
 INSTALLED_APPS = (
+    "django.contrib.contenttypes",
+    "django.contrib.auth",
     "money",
     "money.tests",
 )
@@ -68,3 +70,22 @@ LOGGING = {
         "money": {"handlers": ["console"], "level": "DEBUG"},
     },
 }
+
+USE_TZ = True
+
+# Add TEMPLATES configuration
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(TEST_DIR, "templates")],  # Look in money/tests/templates/
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
