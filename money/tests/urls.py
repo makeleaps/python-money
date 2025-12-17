@@ -12,7 +12,7 @@ from money.tests.views import (
 
 urlpatterns = [
     path("instance-view/", instance_view),
-    re_path("model-view/", model_view),
+    path("model-view/", model_view),
     re_path(
         r"^model-save-view/(?P<amount>\S+)/(?P<currency>\S+)/$", model_from_db_view
     ),
