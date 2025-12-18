@@ -250,9 +250,10 @@ class MoneyFieldTestCase(TestCase):
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(0, "USD")).get()
         self.assertEqual(ent.price, Money(0, "USD"))
 
-    # def test_unsupported_lookup(self) -> None:
-    #     with pytest.raises(NotSupportedLookup):
-    #         SimpleMoneyModel.objects.filter(price__startswith="ABC")
+    def test_unsupported_lookup(self) -> None:
+        with pytest.raises(NotSupportedLookup):
+            kwargs = {"price__startswith": "ABC"}
+            SimpleMoneyModel.objects.filter(**kwargs)
 
     def test_currency_accessor(self) -> None:
         # In the old code, accessing `instance.money_currency` would work.
