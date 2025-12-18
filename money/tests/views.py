@@ -13,7 +13,7 @@ class SampleForm(forms.Form):
     price = MoneyField()
 
 
-class SampleModelForm(forms.ModelForm):
+class SampleModelForm(forms.ModelForm):  # type: ignore[type-arg]
     class Meta:
         model = SimpleMoneyModel
         fields = ("name", "price")
