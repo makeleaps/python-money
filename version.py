@@ -46,9 +46,7 @@
 # first number: major business changes/milestones
 # second number: database changes
 # third number: code changes/patches
-from __future__ import print_function, unicode_literals
-
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 __all__ = "get_git_version"
 

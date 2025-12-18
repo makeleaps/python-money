@@ -28,6 +28,7 @@ dev = [
     "psycopg2==2.9.9",
     "pytest>=8.4.2",
     "pytest-django>=4.11.1",
+    "pre-commit>=4.3.0",
 ]
 
 [tool.mypy]

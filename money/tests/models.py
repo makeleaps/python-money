@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from typing import Union
 
 from django.db import models
@@ -84,8 +82,7 @@ class ParametrizedModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=123)
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("123", "XXX")
+    expected_value = Money("123", "XXX")
 
 
 class ParametrizedDefaultAsZeroMoneyModel(models.Model):
@@ -94,8 +91,7 @@ class ParametrizedDefaultAsZeroMoneyModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=Money(0, "JPY"))
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("0", "JPY")
+    expected_value = Money("0", "JPY")
 
 
 class ParametrizedDefaultAsMoneyModel(models.Model):
@@ -106,8 +102,7 @@ class ParametrizedDefaultAsMoneyModel(models.Model):
     )
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("100", "JPY")
+    expected_value = Money("100", "JPY")
 
 
 class ParametrizedDefaultAsZeroModel(models.Model):
@@ -116,8 +111,7 @@ class ParametrizedDefaultAsZeroModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=0)
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("0", "XXX")
+    expected_value = Money("0", "XXX")
 
 
 class ParametrizedDefaultAsValueModel(models.Model):
@@ -126,8 +120,7 @@ class ParametrizedDefaultAsValueModel(models.Model):
     value = fields.MoneyField(max_digits=12, decimal_places=3, default=100)
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("100", "XXX")
+    expected_value = Money("100", "XXX")
 
 
 class ParametrizedDefaultAsValueWithCurrencyModel(models.Model):
@@ -138,8 +131,7 @@ class ParametrizedDefaultAsValueWithCurrencyModel(models.Model):
     )
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("0", "JPY")
+    expected_value = Money("0", "JPY")
 
 
 class ParametrizedDefaultAsValueWithCurrencyAndLabelModel(models.Model):
@@ -150,8 +142,7 @@ class ParametrizedDefaultAsValueWithCurrencyAndLabelModel(models.Model):
     )
     value_currency: fields.CurrencyField
 
-    def expected_value(self) -> Money:
-        return Money("0", "JPY")
+    expected_value = Money("0", "JPY")
 
 
 ParametrizedModelType = Union[
