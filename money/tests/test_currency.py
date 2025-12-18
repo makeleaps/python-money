@@ -1,6 +1,4 @@
-from money.money import (
-    Currency,
-)
+from money.money import Currency
 
 
 def test_currency_equality() -> None:

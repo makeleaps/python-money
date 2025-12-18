@@ -7,9 +7,7 @@ from django.urls import reverse
 
 from money.tests import settings as test_settings
 
-from money.tests.models import (
-    SimpleMoneyModel,
-)
+from money.tests.models import SimpleMoneyModel
 
 from money.tests.views import (
     instance_view,
@@ -80,9 +78,7 @@ class TestEditView(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, 'value="987.00"')
-        self.assertContains(
-            response, '<option value="JPY" selected="selected">JPY - Yen</option>'
-        )
+        self.assertContains(response, '<option value="JPY" selected>JPY - Yen</option>')
 
     def test_form_GET_zero(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "0.0", "currency": "JPY"})
@@ -90,9 +86,7 @@ class TestEditView(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, 'value="0.0"')
-        self.assertContains(
-            response, '<option value="JPY" selected="selected">JPY - Yen</option>'
-        )
+        self.assertContains(response, '<option value="JPY" selected>JPY - Yen</option>')
 
     def test_form_POST(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "555.5", "currency": "JPY"})
@@ -110,7 +104,7 @@ class TestEditView(TestCase):
         # Find the object we created...
         obj = SimpleMoneyModel.objects.last()
         assert obj is not None
-        self.assertEqual(str(obj.price), "JPY 555.5")
+        self.assertEqual(str(obj.price), "JPY 555.500")
 
         self.assertContains(response, "|item:name|value:ABC|")
         self.assertContains(response, "|item:price|value:JPY 555.5|")

@@ -27,6 +27,7 @@ dev = [
     "mypy>=1.2.0,<1.3",
     "psycopg2==2.9.9",
     "pytest>=8.4.2",
+    "pytest-django>=4.11.1",
 ]
 
 [tool.mypy]
@@ -42,3 +43,10 @@ django_settings_module = "money.tests.settings"
 
 [tool.setuptools.package-data]
 money = ["py.typed"]
+
+# Pytest configuration
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "money.tests.settings"
+pythonpath = ["."]
+python_files = ["test_*.py"]
+testpaths = ["money/tests"]

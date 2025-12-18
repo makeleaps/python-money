@@ -212,9 +212,11 @@ class MoneyField(InfiniteDecimalField):
         setattr(cls, self.name, MoneyFieldProxy(self))
 
         # Set our custom manager
-        if not hasattr(cls, "_default_manager"):
-            from .managers import MoneyManager
+        from .managers import MoneyManager
 
+        if not hasattr(cls, "_default_manager") or not isinstance(
+            cls._default_manager, MoneyManager
+        ):
             cls.add_to_class("objects", MoneyManager())
 
     def get_db_prep_save(self, value, *args, **kwargs):
@@ -230,24 +232,21 @@ class MoneyField(InfiniteDecimalField):
 
         return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
 
-    # TODO: NOT SUPPORTED IN DJANGO 4.0
-    def get_prep_lookup(self, lookup_type, value):
+    def get_db_prep_value(self, value, connection, prepared=False):
         """
-        Prepares the value for passing to the database when used in a lookup
-        (a WHERE constraint in SQL).
-
-        "Your method must be prepared to handle all of these lookup_type values
-        and should raise either a ValueError if the value is of the wrong sort
-        (a list when you were expecting an object, for example) or a TypeError
-        if your field does not support that type of lookup."
-
+        Prepares the value for the database, extracting amount from Money objects.
         """
-        if lookup_type not in SUPPORTED_LOOKUPS:
-            raise NotSupportedLookup(lookup_type)
-
         if isinstance(value, Money):
             value = value.amount
-        return super(MoneyField, self).get_prep_lookup(lookup_type, value)
+        return super().get_db_prep_value(value, connection, prepared)
+
+    def get_lookup(self, lookup_name):
+        """
+        Validates that only supported lookups are used.
+        """
+        if lookup_name not in SUPPORTED_LOOKUPS:
+            raise NotSupportedLookup(lookup_name)
+        return super().get_lookup(lookup_name)
 
     def get_default(self):
         if isinstance(self.default, Money):
