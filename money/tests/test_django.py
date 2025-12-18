@@ -250,8 +250,8 @@ class MoneyFieldTestCase(TestCase):
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(0, "USD")).get()
         self.assertEqual(ent.price, Money(0, "USD"))
 
-    def test_unsupported_lookup(self) -> None:
-        with pytest.raises(NotSupportedLookup):
+    def test_unsupported_lookup(self) -> None:  # type: ignore
+        with pytest.raises(NotSupportedLookup):  # type: ignore
             SimpleMoneyModel.objects.filter(price__startswith="ABC")  # type: ignore
 
     def test_currency_accessor(self) -> None:
