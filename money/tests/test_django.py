@@ -252,7 +252,7 @@ class MoneyFieldTestCase(TestCase):
 
     def test_unsupported_lookup(self) -> None:
         with pytest.raises(NotSupportedLookup):
-            SimpleMoneyModel.objects.filter(price__startswith="ABC")
+            SimpleMoneyModel.objects.filter(price__startswith="ABC")  # type: ignore
 
     def test_currency_accessor(self) -> None:
         # In the old code, accessing `instance.money_currency` would work.
