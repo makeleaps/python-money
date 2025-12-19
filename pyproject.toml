@@ -29,6 +29,7 @@ dev = [
     "pytest>=8.4.2",
     "pytest-django>=4.11.1",
     "pre-commit>=4.3.0",
+    "nox>=2025.11.12",
 ]
 
 [tool.mypy]
