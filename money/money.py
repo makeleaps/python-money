@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Union
+
+from typing_extensions import Self
 
 
 class Currency(object):
@@ -17,7 +19,7 @@ class Currency(object):
         name: str = "",
         symbol: str = "",
         decimals: int = 2,
-        countries: Optional[list[str]] = None,
+        countries: list[str] | None = None,
     ):
         if not countries:
             countries = []
@@ -31,14 +33,14 @@ class Currency(object):
     def __repr__(self) -> str:
         return self.code
 
-    def __eq__(self, other: Union["Currency", str]) -> bool:  # type: ignore[override]
+    def __eq__(self, other: Self | str) -> bool:  # type: ignore[override]
         if isinstance(other, Currency):
             return bool(self.code and other.code and (self.code == other.code))
         if isinstance(other, str):
             return self.code == other
         return False
 
-    def __ne__(self, other: Union["Currency", str]) -> bool:  # type: ignore[override]
+    def __ne__(self, other: Self | str) -> bool:  # type: ignore[override]
         return not self.__eq__(other)
 
 
@@ -59,7 +61,7 @@ class InvalidOperationException(TypeError):
     """Raised when an operation is never allowed"""
 
 
-CompareWithMoney = Union["Money", Decimal, int, float, str]
+CompareWithMoney = Union["Money", Decimal | int | float | str]
 
 
 class Money(object):
@@ -97,7 +99,7 @@ class Money(object):
     _currency: Currency
 
     @classmethod
-    def _from_string(cls, value: Union[str, int, float]) -> tuple[Decimal, Currency]:
+    def _from_string(cls, value: str | int | float) -> tuple[Decimal, Currency]:
         s = str(value).strip()
         try:
             amount = Decimal(s)
@@ -129,8 +131,8 @@ class Money(object):
 
     def __init__(
         self,
-        amount: Optional[Union[str, Decimal, int, float]] = None,
-        currency: Optional[Union[str, Currency]] = None,
+        amount: str | Decimal | int | float | None = None,
+        currency: str | Currency | None = None,
     ):
         if isinstance(amount, Decimal):
             self._amount = amount
@@ -224,7 +226,7 @@ class Money(object):
             raise InvalidOperationException("Cannot multiply monetary quantities")
         return Money(amount=self._amount * Decimal(str(other)), currency=self._currency)
 
-    def __truediv__(self, other: Union[int, Decimal]) -> "Money":
+    def __truediv__(self, other: int | Decimal) -> "Money":
         """
         We allow division by non-money numeric values but dividing by
         another Money value is undefined
@@ -256,7 +258,7 @@ class Money(object):
     __nonzero__ = __bool__
 
     # Comparison operators
-    def __eq__(self, other: Optional[CompareWithMoney]) -> bool:  # type: ignore[override]
+    def __eq__(self, other: CompareWithMoney | None) -> bool:  # type: ignore[override]
         if isinstance(other, Money):
             return bool(
                 (self._amount == other.amount) and (self._currency == other.currency)
@@ -266,7 +268,7 @@ class Money(object):
             return True
         return False
 
-    def __ne__(self, other: Optional[CompareWithMoney]) -> bool:  # type: ignore[override]
+    def __ne__(self, other: CompareWithMoney | None) -> bool:  # type: ignore[override]
         return not self.__eq__(other)
 
     def __lt__(self, other: CompareWithMoney) -> bool:

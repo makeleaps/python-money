@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import Iterable
 
 import pytest
 from django.db import IntegrityError
@@ -15,7 +15,7 @@ from money.tests.models import (
 
 
 def assert_same_currency(
-    moneys: Iterable[Money], currency_code: Optional[str] = None
+    moneys: Iterable[Money], currency_code: str | None = None
 ) -> None:
     """Utility function to assert a collection of currencies are all the same"""
     currency_codes = set([m.currency.code for m in moneys])

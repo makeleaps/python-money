@@ -1,11 +1,10 @@
 from decimal import Decimal
-from typing import Optional, Union
 
 from django.db import models
 from django.utils.translation import gettext_lazy
 
 from money.contrib.django import forms
-from money.money import Money, Currency
+from money.money import Currency, Money
 
 __all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
 
@@ -50,7 +49,7 @@ class MoneyFieldProxy(object):
         self.amount_field_name: str = field.name
         self.currency_field_name: str = field.currency_field_name
 
-    def _get_values(self, obj: models.Model) -> tuple[Optional[Decimal], Optional[str]]:
+    def _get_values(self, obj: models.Model) -> tuple[Decimal | None, str | None]:
         return (
             obj.__dict__.get(self.field.amount_field_name, None),
             obj.__dict__.get(self.field.currency_field_name, None),
@@ -59,8 +58,8 @@ class MoneyFieldProxy(object):
     def _set_values(
         self,
         obj: models.Model,
-        amount: Optional[Decimal],
-        currency: Optional[Union[str, Currency]],
+        amount: Decimal | None,
+        currency: str | Currency | None,
     ) -> None:
         obj.__dict__[self.field.amount_field_name] = amount
         obj.__dict__[self.field.currency_field_name] = currency
