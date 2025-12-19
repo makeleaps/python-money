@@ -3,7 +3,7 @@ name = "python-money"
 version = "0.1.0"
 description = "Primitives for working with money and currencies in Python"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "BSD"}
 authors = [{name = "Paul Oswald", email = "pauloswald@gmail.com"}]
 keywords = ["money", "currency", "finance"]
