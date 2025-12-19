@@ -1,11 +1,9 @@
-from __future__ import print_function
-
 from django import forms
-from django.http import HttpResponse, HttpRequest
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, render
 
-from money.money import Money
 from money.contrib.django.forms.fields import MoneyField
+from money.money import Money
 from money.tests.models import SimpleMoneyModel
 
 

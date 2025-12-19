@@ -1,12 +1,9 @@
-from __future__ import division, unicode_literals
-
-from typing import Union, Callable, Optional
+from decimal import Decimal
+from typing import Callable, Optional, Union
 
 import pytest
-from decimal import Decimal
 
-from money.money import Money, CurrencyMismatchException
-
+from money.money import CurrencyMismatchException, InvalidOperationException, Money
 
 MONEY_STRINGS: list[tuple[Money, str]] = [
     # Undefined currency:
@@ -104,7 +101,7 @@ MONEY_ARITHMETIC_UNSUPPORTED: list[ArithmeticFunc] = [
 
 
 @pytest.mark.parametrize("value", MONEY_ARITHMETIC_UNSUPPORTED)
-def test_invalid_arithmetic(value: ArithmeticFunc) -> None:
+def test_error_invalid_arithmetic(value: ArithmeticFunc) -> None:
     with pytest.raises(TypeError):
         value()
 
@@ -117,7 +114,7 @@ MONEY_ARITHMETIC_MISMATCHED: list[ArithmeticFunc] = [
 
 
 @pytest.mark.parametrize("value", MONEY_ARITHMETIC_MISMATCHED)
-def test_invalid_currency(value: ArithmeticFunc) -> None:
+def test_error_invalid_currency(value: ArithmeticFunc) -> None:
     with pytest.raises(CurrencyMismatchException):
         value()
 
@@ -227,3 +224,56 @@ MONEY_EQUALITY: list[tuple[bool, bool]] = [
 @pytest.mark.parametrize("value,expected", MONEY_EQUALITY)
 def test_equality(value: bool, expected: bool) -> None:
     assert value == expected
+
+
+"""
+Tests of invalid operations on the Money class. All of these are tests of
+undefined behavior. For the most part we expect an exception to be raised.
+
+In general, we are taking the stance that Money operations should typically
+be conservative. Please see the README for more information.
+
+"""
+
+
+def test_error_differing_currency_subtraction() -> None:
+    with pytest.raises(CurrencyMismatchException):
+        Money(10, "JPY") - Money(3, "USD")
+
+
+def test_error_differing_currency_addition() -> None:
+    with pytest.raises(CurrencyMismatchException):
+        Money(10, "JPY") + Money(3, "USD")
+
+
+def test_error_division_is_invalid() -> None:
+    # Division of two currencies doesn't really make sense
+    with pytest.raises(InvalidOperationException):
+        (Money(10, "USD") / Money(3, "USD"),)  # type: ignore[operator]
+
+
+def test_differing_currency_division() -> None:
+    with pytest.raises(InvalidOperationException):
+        (Money(10, "JPY") / Money(3, "USD"),)  # type: ignore[operator]
+
+
+def test_error_invalid_multiplication() -> None:
+    # Multiplication of two currencies doesn't really make sense
+    with pytest.raises(InvalidOperationException):
+        Money(10, "USD") * Money(3, "USD")
+
+
+def test_error_differing_currency_multiplication() -> None:
+    # Differing currencies should not matter
+    with pytest.raises(InvalidOperationException):
+        Money(10, "JPY") * Money(3, "USD")
+
+
+def test_error_mutation_of_amount() -> None:
+    with pytest.raises(AttributeError):
+        Money(10, "JPY").amount = 3  # type: ignore[misc, assignment]
+
+
+def test_error_mutation_of_currency() -> None:
+    with pytest.raises(AttributeError):
+        Money(10, "JPY").currency = "USD"  # type: ignore[misc, assignment]

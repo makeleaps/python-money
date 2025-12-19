@@ -1,0 +1,38 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      # Run the linter.
+      - id: ruff
+        name: Ruff (Linting)
+        verbose: true
+        args: ["--ignore", "I"] # Ignore import sorting errors, they'll be fixed separately.
+      # Run the formatter.
+      - id: ruff-format
+        name: Ruff (Formatting)
+        verbose: true
+      # Run the import sorter.
+      - id: ruff
+        alias: ruff-isort
+        name: Ruff (Import Sorting)
+        verbose: true
+        args: ["--fix-only", "--select", "I"]
+
+  - repo: local
+    hooks:
+      - id: Mypy
+        name: Mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        require_serial: true
+        pass_filenames: false
+        args: [.]
+
+      - id: Pytest
+        name: Pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]

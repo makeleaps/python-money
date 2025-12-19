@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import division, unicode_literals
-
 from decimal import Decimal
 from typing import Optional, Union
 
