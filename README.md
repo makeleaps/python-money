@@ -22,7 +22,7 @@ Installation
 
 You can install this project directly from the git repository using pip:
 
-    $ pip install -e git+http://github.com/poswald/python-money.git@0.0.1#egg=python-money
+    $ pip install -e git+http://github.com/makeleaps/python-money.git@0.0.1#egg=python-money
 
 You do not have to specify the version number, but it might be a good idea.
 
