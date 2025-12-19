@@ -50,12 +50,10 @@ from subprocess import PIPE, Popen
 
 __all__ = "get_git_version"
 
-from typing import Optional
-
 
 def call_git_describe(
     abbrev: int = 5,
-) -> tuple[Optional[str], Optional[str], Optional[str]]:
+) -> tuple[str | None, str | None, str | None]:
     """
     The `git describe --long` command outputs in the format of:
 
@@ -92,7 +90,7 @@ def call_git_describe(
         return (None, None, None)
 
 
-def read_release_version() -> Optional[str]:
+def read_release_version() -> str | None:
     try:
         f = open("RELEASE-VERSION", "r")
 
@@ -113,7 +111,7 @@ def write_release_version(version: str) -> None:
     f.close()
 
 
-def get_git_version(abbrev: int = 4) -> Optional[str]:
+def get_git_version(abbrev: int = 4) -> str | None:
     """
     Returns this project's version number based on the git repo's tags or from
     the RELEASE-VERSION file if this is a packaged release without a .git
@@ -134,7 +132,7 @@ def get_git_version(abbrev: int = 4) -> Optional[str]:
     # First try to get the current version using "git describe".
     tag, count, _ = call_git_describe(abbrev)
 
-    version: Optional[str]
+    version: str | None
     if count == "0":
         if tag:
             # Normal tagged release
@@ -159,7 +157,7 @@ def get_git_version(abbrev: int = 4) -> Optional[str]:
     return version
 
 
-def get_git_hash() -> Optional[str]:
+def get_git_hash() -> str | None:
     _, _, sha = call_git_describe()
     return sha
 

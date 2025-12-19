@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Callable, Optional, Union
+from typing import Callable
 
 import pytest
 
@@ -36,7 +36,7 @@ def test_repr(value: Money, expected: str) -> None:
     assert repr(value) == expected
 
 
-Value = Optional[Union[Money, Decimal, float, int]]
+Value = Money | Decimal | float | int | None
 ArithmeticFunc = Callable[[], Value]
 
 MONEY_ARITHMETIC: list[tuple[ArithmeticFunc, Value]] = [
