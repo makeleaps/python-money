@@ -1,7 +1,8 @@
 from django import forms
-from .widgets import CurrencySelectWidget
 
-from money.money import Money, CURRENCY
+from money.money import CURRENCY, Money
+
+from .widgets import CurrencySelectWidget
 
 
 class MoneyField(forms.MultiValueField):
@@ -29,7 +30,7 @@ class MoneyField(forms.MultiValueField):
             ),
             forms.ChoiceField(choices=choices),
         )
-        super(MoneyField, self).__init__(fields, *args, **kwargs)
+        super().__init__(fields, *args, **kwargs)
 
     def compress(self, data_list):
         """

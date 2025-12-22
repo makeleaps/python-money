@@ -22,8 +22,7 @@ SUPPORTED_LOOKUPS = ("exact", "lt", "gt", "lte", "gte", "isnull")
 
 class NotSupportedLookup(TypeError):
     def __init__(self, lookup):
-        super(NotSupportedLookup, self).__init__()
-
+        super().__init__()
         self.lookup = lookup
 
     def __str__(self):
@@ -51,8 +50,8 @@ class MoneyFieldProxy(object):
 
     def _get_values(self, obj: models.Model) -> tuple[Decimal | None, str | None]:
         return (
-            obj.__dict__.get(self.field.amount_field_name, None),
-            obj.__dict__.get(self.field.currency_field_name, None),
+            obj.__dict__.get(self.amount_field_name, None),
+            obj.__dict__.get(self.currency_field_name, None),
         )
 
     def _set_values(
@@ -61,8 +60,8 @@ class MoneyFieldProxy(object):
         amount: Decimal | None,
         currency: str | Currency | None,
     ) -> None:
-        obj.__dict__[self.field.amount_field_name] = amount
-        obj.__dict__[self.field.currency_field_name] = currency
+        obj.__dict__[self.amount_field_name] = amount
+        obj.__dict__[self.currency_field_name] = currency
 
     def __get__(self, obj: models.Model, *args):
         if obj is None:
@@ -105,7 +104,7 @@ class InfiniteDecimalField(models.DecimalField):
         if "postgresql" in engine:
             return "numeric"
 
-        return super(InfiniteDecimalField, self).db_type(connection=connection)
+        return super().db_type(connection=connection)
 
     def get_db_prep_save(self, value, *args, **kwargs):
         """
@@ -161,10 +160,10 @@ class MoneyField(InfiniteDecimalField):
         else:
             self.default_currency = default_currency or ""  # use the kwarg passed in
 
-        super(MoneyField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def deconstruct(self):
-        name, path, args, kwargs = super(MoneyField, self).deconstruct()
+        name, path, args, kwargs = super().deconstruct()
         kwargs["no_currency_field"] = True
         return name, path, args, kwargs
 
@@ -205,18 +204,10 @@ class MoneyField(InfiniteDecimalField):
             cls.add_to_class(self.currency_field_name, c_field)
 
         # Set ourselves up normally
-        super(MoneyField, self).contribute_to_class(cls, name)
+        super().contribute_to_class(cls, name)
 
         # As we are not using SubfieldBase, we need to set our proxy class here
         setattr(cls, self.name, MoneyFieldProxy(self))
-
-        # Set our custom manager
-        from .managers import MoneyManager
-
-        if not hasattr(cls, "_default_manager"):
-            from .managers import MoneyManager
-
-            cls.add_to_class("objects", MoneyManager())
 
     def get_db_prep_save(self, value, *args, **kwargs):
         """
@@ -229,14 +220,14 @@ class MoneyField(InfiniteDecimalField):
         if isinstance(value, Money):
             value = value.amount
 
-        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
+        return super().get_db_prep_save(value, *args, **kwargs)
 
     def get_db_prep_value(self, value, connection, prepared=False):
         """
         Prepares the value for the database, extracting amount from Money objects.
         """
         if isinstance(value, Money):
-            value = value.amount
+            raise NotImplementedError("Lookups for MoneyField does not support Money.")
         return super().get_db_prep_value(value, connection, prepared)
 
     def get_lookup(self, lookup_name):
@@ -251,7 +242,7 @@ class MoneyField(InfiniteDecimalField):
         if isinstance(self.default, Money):
             return self.default
         else:
-            return super(MoneyField, self).get_default()
+            return super().get_default()
 
     def value_to_string(self, obj):
         """
@@ -265,7 +256,7 @@ class MoneyField(InfiniteDecimalField):
     def formfield(self, **kwargs):
         defaults = {"form_class": forms.MoneyField}
         defaults.update(kwargs)
-        return super(MoneyField, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
     @property
     def validators(self):
