@@ -213,9 +213,9 @@ class MoneyField(InfiniteDecimalField):
         # Set our custom manager
         from .managers import MoneyManager
 
-        if not hasattr(cls, "_default_manager") or not isinstance(
-            cls._default_manager, MoneyManager
-        ):
+        if not hasattr(cls, "_default_manager"):
+            from .managers import MoneyManager
+
             cls.add_to_class("objects", MoneyManager())
 
     def get_db_prep_save(self, value, *args, **kwargs):
