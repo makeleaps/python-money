@@ -3,7 +3,7 @@ from decimal import Decimal
 import pytest
 from django.db.models import Model, Q, QuerySet
 
-from money.money import Money
+from money.dataclasses.money import Money
 from money.tests.models import (
     MoneyModelWithCustomManager,
     NullableMoneyModel,

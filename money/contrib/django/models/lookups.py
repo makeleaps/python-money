@@ -6,7 +6,7 @@ from django.db.models.expressions import Col, Expression
 from django.db.models.sql.compiler import SQLCompiler
 from typing_extensions import TypeAlias
 
-from money.money import Money
+from money.dataclasses.money import Money
 
 T = TypeVar("T")
 _ParamT: TypeAlias = str | int

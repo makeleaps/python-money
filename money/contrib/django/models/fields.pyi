@@ -5,7 +5,8 @@ from django.db import models
 from django.db.models import Combinable
 from django.utils.functional import _StrOrPromise
 
-from money.money import Currency, Money
+from money.dataclasses.currency import Currency
+from money.dataclasses.money import Money
 
 class NotSupportedLookup(TypeError): ...
 

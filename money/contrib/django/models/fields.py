@@ -14,21 +14,13 @@ from money.contrib.django.models.utils import (
     currency_field_db_column,
     currency_field_name,
 )
-from money.money import Money
+from money.dataclasses.money import Money
 
-__all__ = ("MoneyField", "NotSupportedLookup")
+__all__ = ("MoneyField",)
+
+from money.exceptions import NotSupportedLookup
 
 SUPPORTED_LOOKUPS = ("exact", "lt", "gt", "lte", "gte", "isnull")
-
-
-class NotSupportedLookup(TypeError):
-    def __init__(self, lookup):
-        super(NotSupportedLookup, self).__init__()
-
-        self.lookup = lookup
-
-    def __str__(self):
-        return "Lookup '%s' is not supported for MoneyField" % self.lookup
 
 
 class InfiniteDecimalField(models.DecimalField):
@@ -38,7 +30,7 @@ class InfiniteDecimalField(models.DecimalField):
         if "postgresql" in engine:
             return "numeric"
 
-        return super(InfiniteDecimalField, self).db_type(connection=connection)
+        return super().db_type(connection=connection)
 
     def get_db_prep_save(self, value, *args, **kwargs):
         """
@@ -95,10 +87,10 @@ class MoneyField(InfiniteDecimalField):
         else:
             self.default_currency = default_currency or ""  # use the kwarg passed in
 
-        super(MoneyField, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def deconstruct(self):
-        name, path, args, kwargs = super(MoneyField, self).deconstruct()
+        name, path, args, kwargs = super().deconstruct()
         kwargs["no_currency_field"] = True
         return name, path, args, kwargs
 
@@ -139,7 +131,7 @@ class MoneyField(InfiniteDecimalField):
             cls.add_to_class(self.currency_field_name, c_field)
 
         # Set ourselves up normally
-        super(MoneyField, self).contribute_to_class(cls, name)
+        super().contribute_to_class(cls, name)
 
         # As we are not using SubfieldBase, we need to set our proxy class here
         setattr(cls, self.name, MoneyFieldProxy(self))
@@ -155,7 +147,7 @@ class MoneyField(InfiniteDecimalField):
         if isinstance(value, Money):
             value = value.amount
 
-        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
+        return super().get_db_prep_save(value, *args, **kwargs)
 
     def get_db_prep_value(self, value, connection, prepared=False):
         """
@@ -177,7 +169,7 @@ class MoneyField(InfiniteDecimalField):
         if isinstance(self.default, Money):
             return self.default
         else:
-            return super(MoneyField, self).get_default()
+            return super().get_default()
 
     def value_to_string(self, obj):
         """
@@ -191,7 +183,7 @@ class MoneyField(InfiniteDecimalField):
     def formfield(self, **kwargs):
         defaults = {"form_class": forms.MoneyField}
         defaults.update(kwargs)
-        return super(MoneyField, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
     @property
     def validators(self):

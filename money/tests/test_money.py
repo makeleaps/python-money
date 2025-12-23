@@ -2,7 +2,10 @@ from decimal import Decimal
 
 import pytest
 
-from money.money import CURRENCY, Currency, IncorrectMoneyInputError, Money
+from money.constants import CURRENCY
+from money.dataclasses.currency import Currency
+from money.dataclasses.money import Money
+from money.exceptions import IncorrectMoneyInputError
 
 
 def test_string_parse() -> None:
