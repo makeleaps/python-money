@@ -1,9 +1,13 @@
-from typing import Union
+from typing import Any, ClassVar, TypeVar, Union
 
 from django.db import models
+from django.db.models import QuerySet
+from typing_extensions import Self
 
 from money.contrib.django.models import fields
 from money.money import Money
+
+T = TypeVar("T", bound=models.Model)
 
 
 # Tests for Django models. We set up three types of models with different
@@ -69,6 +73,27 @@ class NullableMoneyModel(models.Model):
 
     def __str__(self) -> str:
         return self.name + " " + str(self.price)
+
+    class Meta:
+        app_label = "tests"
+
+
+class CustomQuerySet(QuerySet[T]):
+    def only_usd(self, *args: Any, **kwargs: Any) -> Self:
+        return self.filter(price_currency="USD", *args, **kwargs)
+
+
+# Create a properly typed manager from the queryset
+CustomManager = models.Manager.from_queryset(CustomQuerySet)
+
+
+class MoneyModelWithCustomManager(models.Model):
+    name = models.CharField(max_length=100)
+
+    price = fields.MoneyField(max_digits=12, decimal_places=3)
+    price_currency: fields.CurrencyField
+
+    objects: ClassVar[CustomManager["MoneyModelWithCustomManager"]] = CustomManager()
 
     class Meta:
         app_label = "tests"

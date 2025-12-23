@@ -1,21 +1,22 @@
-from decimal import Decimal
-
 from django.db import models
 from django.utils.translation import gettext_lazy
 
 from money.contrib.django import forms
-from money.money import Currency, Money
+from money.contrib.django.models.lookups import (
+    MoneyExactLookup,
+    MoneyGteLookup,
+    MoneyGtLookup,
+    MoneyLteLookup,
+    MoneyLtLookup,
+)
+from money.contrib.django.models.proxy import MoneyFieldProxy
+from money.contrib.django.models.utils import (
+    currency_field_db_column,
+    currency_field_name,
+)
+from money.money import Money
 
-__all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
-
-
-def currency_field_name(name: str) -> str:
-    return "%s_currency" % name
-
-
-def currency_field_db_column(db_column):
-    return None if db_column is None else "%s_currency" % db_column
-
+__all__ = ("MoneyField", "NotSupportedLookup")
 
 SUPPORTED_LOOKUPS = ("exact", "lt", "gt", "lte", "gte", "isnull")
 
@@ -28,74 +29,6 @@ class NotSupportedLookup(TypeError):
 
     def __str__(self):
         return "Lookup '%s' is not supported for MoneyField" % self.lookup
-
-
-class MoneyFieldProxy(object):
-    """
-    An equivalent to Django's default attribute descriptor class SubfieldBase
-    (normally enabled via `__metaclass__ = models.SubfieldBase` on the custom
-    Field class).
-
-    Instead of calling to_python() on our MoneyField class as SubfieldBase
-    does, it stores the two different parts separately, and updates them
-    whenever something is assigned. If the attribute is read, it builds the
-    instance "on-demand" with the current data.
-
-    See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
-    """
-
-    def __init__(self, field: "MoneyField"):
-        self.field: "MoneyField" = field
-        self.amount_field_name: str = field.name
-        self.currency_field_name: str = field.currency_field_name
-
-    def _get_values(self, obj: models.Model) -> tuple[Decimal | None, str | None]:
-        return (
-            obj.__dict__.get(self.field.amount_field_name, None),
-            obj.__dict__.get(self.field.currency_field_name, None),
-        )
-
-    def _set_values(
-        self,
-        obj: models.Model,
-        amount: Decimal | None,
-        currency: str | Currency | None,
-    ) -> None:
-        obj.__dict__[self.field.amount_field_name] = amount
-        obj.__dict__[self.field.currency_field_name] = currency
-
-    def __get__(self, obj: models.Model, *args):
-        if obj is None:
-            return self
-        amount, currency = self._get_values(obj)
-        if amount is None:
-            return None
-        return Money(amount, currency)
-
-    def __set__(self, obj: models.Model, value):
-        if value is None:  # Money(0) is False
-            self._set_values(obj, None, "")
-        elif isinstance(value, Money):
-            self._set_values(obj, value.amount, value.currency.code)
-        elif isinstance(value, Decimal):
-            _, currency = self._get_values(obj)  # use what is currently set
-            self._set_values(obj, value, currency)
-        else:
-            # It could be an int, or some other python native type
-            try:
-                amount = Decimal(str(value))
-                _, currency = self._get_values(obj)  # use what is currently set
-                self._set_values(obj, amount, currency)
-            except TypeError:
-                # Lastly, assume string type 'XXX 123' or something Money can
-                # handle.
-                try:
-                    _, currency = self._get_values(obj)  # use what is currently set
-                    m = Money.from_string(str(value))
-                    self._set_values(obj, m.amount, m.currency)
-                except TypeError:
-                    msg = 'Cannot assign "%s"' % type(value)
-                    raise TypeError(msg)
 
 
 class InfiniteDecimalField(models.DecimalField):
@@ -141,6 +74,8 @@ class CurrencyField(models.CharField):
 
 class MoneyField(InfiniteDecimalField):
     description = gettext_lazy("An amount and type of currency")
+
+    add_currency_field: bool
     currency_field_name: str
 
     # Don't extend SubfieldBase since we need to have access to both fields when
@@ -152,7 +87,6 @@ class MoneyField(InfiniteDecimalField):
         default_currency = kwargs.pop("default_currency", "")
         default = kwargs.get("default", None)
         self.add_currency_field = not kwargs.pop("no_currency_field", False)
-
         self.blankable = kwargs.get("blank", False)
 
         if isinstance(default, Money):
@@ -210,14 +144,6 @@ class MoneyField(InfiniteDecimalField):
         # As we are not using SubfieldBase, we need to set our proxy class here
         setattr(cls, self.name, MoneyFieldProxy(self))
 
-        # Set our custom manager
-        from .managers import MoneyManager
-
-        if not hasattr(cls, "_default_manager") or not isinstance(
-            cls._default_manager, MoneyManager
-        ):
-            cls.add_to_class("objects", MoneyManager())
-
     def get_db_prep_save(self, value, *args, **kwargs):
         """
         Called when the Field value must be saved to the database. As the
@@ -272,3 +198,11 @@ class MoneyField(InfiniteDecimalField):
         # Hack around the fact that we inherit from DecimalField but don't hold
         # Decimals. The real fix is to stop inheriting from DecimalField.
         return []
+
+
+# Register custom lookups that handle Money objects with currency checking
+MoneyField.register_lookup(MoneyExactLookup)
+MoneyField.register_lookup(MoneyLtLookup)
+MoneyField.register_lookup(MoneyLteLookup)
+MoneyField.register_lookup(MoneyGtLookup)
+MoneyField.register_lookup(MoneyGteLookup)

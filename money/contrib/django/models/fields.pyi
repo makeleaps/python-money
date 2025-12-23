@@ -1,13 +1,11 @@
-from typing import Any, Optional, TypeVar, Generic
+from decimal import Decimal
+from typing import Any, TypeVar
 
 from django.db import models
 from django.db.models import Combinable
-
-from money.money import Money, Currency
 from django.utils.functional import _StrOrPromise
-from decimal import Decimal
 
-def currency_field_name(name: str) -> str: ...
+from money.money import Currency, Money
 
 class NotSupportedLookup(TypeError): ...
 
@@ -17,23 +15,10 @@ class CurrencyField(models.CharField[str, str]):
 
 F = TypeVar("F", bound="MoneyField")
 
-class MoneyFieldProxy(Generic[F]):
-    field: F = ...
-    amount_field_name: str = ...
-    currency_field_name: str = ...
-
-    def __init__(self, field: F) -> None: ...
-    def _get_values(
-        self, obj: models.Model
-    ) -> tuple[Optional[Decimal], Optional[str]]: ...
-    def _set_values(
-        self, obj: models.Model, amount: Optional[Decimal], currency: Optional[str]
-    ) -> None: ...
-
 class MoneyField(models.DecimalField[Money, Money]):
     _pyi_private_set_type: Money | Decimal | int  # type: ignore[assignment]
     _pyi_private_get_type: Money  # type: ignore[assignment]
-    _pyi_lookup_exact_type: Money | Decimal | int  # type: ignore[assignment]
+    _pyi_lookup_exact_type: Money | Decimal | int | float  # type: ignore[assignment]
 
     currency_field_name: str
 
@@ -41,7 +26,7 @@ class MoneyField(models.DecimalField[Money, Money]):
     decimal_places: int
 
     default_currency: str | Currency
-    no_currency_field: bool
+    add_currency_field: bool
 
     def __init__(
         self,

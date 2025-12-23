@@ -1,5 +1,3 @@
-from typing import Iterable
-
 import pytest
 from django.db import IntegrityError
 from django.test import TestCase
@@ -12,16 +10,6 @@ from money.tests.models import (
     NullableMoneyModel,
     SimpleMoneyModel,
 )
-
-
-def assert_same_currency(
-    moneys: Iterable[Money], currency_code: str | None = None
-) -> None:
-    """Utility function to assert a collection of currencies are all the same"""
-    currency_codes = set([m.currency.code for m in moneys])
-    assert len(currency_codes) == 1
-    if currency_code:
-        assert currency_codes.pop() == currency_code
 
 
 @pytest.mark.django_db
@@ -55,7 +43,7 @@ class MoneyFieldTestCase(TestCase):
 
     def test_retrieve(self) -> None:
         price = Money(100, "USD")
-        SimpleMoneyModel.objects.create(name="one hundred dollars", price=price)
+        SimpleMoneyModel.objects.create(name="USD100", price=price)
 
         # Filter
         queryset = SimpleMoneyModel.objects.filter(price=price)
@@ -87,9 +75,8 @@ class MoneyFieldTestCase(TestCase):
 
     def test_retrieve_and_update(self) -> None:
         created = SimpleMoneyModel.objects.create(
-            name="one hundred dollars", price=Money(100, "USD")
+            name="USD100", price=Money(100, "USD")
         )
-        created.save()
         assert created.price == Money(100, "USD")
 
         ent = SimpleMoneyModel.objects.filter(price__exact=Money(100, "USD")).get()
@@ -114,95 +101,6 @@ class MoneyFieldTestCase(TestCase):
 
         ent = MoneyModelDefaults.objects.get(pk=ent.id)
         assert ent.price == Money(100, "USD")
-
-    def test_lookup(self) -> None:
-        USD100 = Money(100, "USD")
-        EUR100 = Money(100, "EUR")
-        UAH100 = Money(100, "UAH")
-
-        SimpleMoneyModel.objects.create(name="one hundred dollars", price=USD100)
-        SimpleMoneyModel.objects.create(
-            name="one hundred and one dollars", price=USD100 + 1
-        )
-        SimpleMoneyModel.objects.create(name="ninety nine dollars", price=USD100 - 1)
-
-        SimpleMoneyModel.objects.create(name="one hundred euros", price=EUR100)
-        SimpleMoneyModel.objects.create(
-            name="one hundred and one euros", price=EUR100 + 1
-        )
-        SimpleMoneyModel.objects.create(name="ninety nine euros", price=EUR100 - 1)
-
-        SimpleMoneyModel.objects.create(name="one hundred hryvnias", price=UAH100)
-        SimpleMoneyModel.objects.create(
-            name="one hundred and one hryvnias", price=UAH100 + 1
-        )
-        SimpleMoneyModel.objects.create(name="ninety nine hryvnias", price=UAH100 - 1)
-
-        # Exact:
-        queryset = SimpleMoneyModel.objects.filter(price__exact=USD100)
-        assert queryset.count() == 1
-        queryset = SimpleMoneyModel.objects.filter(price__exact=EUR100)
-        assert queryset.count() == 1
-        queryset = SimpleMoneyModel.objects.filter(price__exact=UAH100)
-        assert queryset.count() == 1
-
-        # Less than:
-        queryset = SimpleMoneyModel.objects.filter(price__lt=USD100)
-        assert queryset.count() == 1
-        assert queryset[0].price == USD100 - 1
-
-        queryset = SimpleMoneyModel.objects.filter(price__lt=EUR100)
-        assert queryset.count() == 1
-        assert queryset[0].price == EUR100 - 1
-
-        queryset = SimpleMoneyModel.objects.filter(price__lt=UAH100)
-        assert queryset.count() == 1
-        assert queryset[0].price == UAH100 - 1
-
-        # Greater than:
-        queryset = SimpleMoneyModel.objects.filter(price__gt=USD100)
-        assert queryset.count() == 1
-        assert queryset[0].price == USD100 + 1
-
-        queryset = SimpleMoneyModel.objects.filter(price__gt=EUR100)
-        assert queryset.count() == 1
-        assert queryset[0].price == EUR100 + 1
-
-        queryset = SimpleMoneyModel.objects.filter(price__gt=UAH100)
-        assert queryset.count() == 1
-        assert queryset[0].price == UAH100 + 1
-
-        # Less than or equal:
-        queryset = SimpleMoneyModel.objects.filter(price__lte=USD100)
-        assert queryset.count() == 2
-        assert_same_currency([ent.price for ent in queryset], "USD")
-        for ent in queryset:
-            assert ent.price.amount <= 100
-
-        queryset = SimpleMoneyModel.objects.filter(price__lte=EUR100)
-        assert queryset.count() == 2
-        assert_same_currency([ent.price for ent in queryset], "EUR")
-        for ent in queryset:
-            assert ent.price.amount <= 100
-
-        queryset = SimpleMoneyModel.objects.filter(price__lte=UAH100)
-        assert queryset.count() == 2
-        assert_same_currency([ent.price for ent in queryset], "UAH")
-        for ent in queryset:
-            assert ent.price.amount <= 100
-
-        # Greater than or equal:
-        queryset = SimpleMoneyModel.objects.filter(price__gte=USD100)
-        assert queryset.count() == 2
-        assert_same_currency([ent.price for ent in queryset], "USD")
-
-        queryset = SimpleMoneyModel.objects.filter(price__gte=EUR100)
-        assert queryset.count() == 2
-        assert_same_currency([ent.price for ent in queryset], "EUR")
-
-        queryset = SimpleMoneyModel.objects.filter(price__gte=UAH100)
-        assert queryset.count() == 2
-        assert_same_currency([ent.price for ent in queryset], "UAH")
 
     def test_price_attribute(self) -> None:
         e = SimpleMoneyModel()

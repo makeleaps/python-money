@@ -1,7 +1,8 @@
 from django import forms
-from .widgets import CurrencySelectWidget
 
-from money.money import Money, CURRENCY
+from money.money import CURRENCY, Money
+
+from .widgets import CurrencySelectWidget
 
 
 class MoneyField(forms.MultiValueField):
