@@ -1,10 +1,18 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 from django.db import models
+from django.db.models import Lookup
 from django.utils.translation import gettext_lazy
 
 from money.contrib.django import forms
 from money.money import Currency, Money
+
+if TYPE_CHECKING:
+    from django.db.backends.base.base import BaseDatabaseWrapper
+    from django.db.models.expressions import Col
+    from django.db.models.sql.compiler import SQLCompiler
+
 
 __all__ = ("MoneyField", "currency_field_name", "NotSupportedLookup")
 
@@ -27,6 +35,90 @@ class NotSupportedLookup(TypeError):
 
     def __str__(self):
         return "Lookup '%s' is not supported for MoneyField" % self.lookup
+
+
+class MoneyCurrencyLookupMixin:
+    """
+    Mixin for lookups that need to check currency when Money objects are used.
+
+    This mixin expects to be mixed with django.db.models.Lookup and uses
+    the following attributes/methods from that class:
+    - process_lhs(): Process left-hand side of the lookup
+    - process_rhs(): Process right-hand side of the lookup
+    - lhs: Left-hand side expression (Col)
+    - rhs: Right-hand side value
+    - operator: SQL operator string
+    """
+
+    if TYPE_CHECKING:
+        # Type stubs for attributes/methods provided by Lookup base class
+        operator: str
+        rhs: Any
+        lhs: "Col"
+
+        def process_lhs(
+            self, compiler: "SQLCompiler", connection: "BaseDatabaseWrapper"
+        ) -> tuple[str, list[Any]]: ...
+
+        def process_rhs(
+            self, compiler: "SQLCompiler", connection: "BaseDatabaseWrapper"
+        ) -> tuple[str, list[Any]]: ...
+
+    def as_sql(
+        self, compiler: "SQLCompiler", connection: "BaseDatabaseWrapper"
+    ) -> tuple[str, list[Any]]:
+        lhs, lhs_params = self.process_lhs(compiler, connection)
+        rhs, rhs_params = self.process_rhs(compiler, connection)
+
+        # Check if the original rhs value (before processing) is a Money object
+        if isinstance(self.rhs, Money):
+            # Get the currency field column name
+            currency_field = currency_field_name(self.lhs.field.name)
+            currency_column = self.lhs.field.model._meta.get_field(
+                currency_field
+            ).column
+
+            # Build SQL that checks both amount and currency
+            # Get the table alias from lhs
+            table_name = self.lhs.alias
+            currency_lhs_sql = f"{compiler.quote_name_unless_alias(table_name)}.{compiler.quote_name_unless_alias(currency_column)}"
+
+            # Construct the full condition
+            amount_condition = f"{lhs} {self.operator} {rhs}"
+            currency_condition = f"{currency_lhs_sql} = %s"
+
+            sql = f"({amount_condition} AND {currency_condition})"
+            params = lhs_params + [self.rhs.amount, self.rhs.currency.code]
+
+            return sql, params
+        else:
+            # Normal lookup without currency check
+            return f"{lhs} {self.operator} {rhs}", lhs_params + rhs_params
+
+
+class MoneyExactLookup(MoneyCurrencyLookupMixin, Lookup):
+    lookup_name = "exact"
+    operator = "="
+
+
+class MoneyLtLookup(MoneyCurrencyLookupMixin, Lookup):
+    lookup_name = "lt"
+    operator = "<"
+
+
+class MoneyLteLookup(MoneyCurrencyLookupMixin, Lookup):
+    lookup_name = "lte"
+    operator = "<="
+
+
+class MoneyGtLookup(MoneyCurrencyLookupMixin, Lookup):
+    lookup_name = "gt"
+    operator = ">"
+
+
+class MoneyGteLookup(MoneyCurrencyLookupMixin, Lookup):
+    lookup_name = "gte"
+    operator = ">="
 
 
 class MoneyFieldProxy(object):
@@ -263,3 +355,11 @@ class MoneyField(InfiniteDecimalField):
         # Hack around the fact that we inherit from DecimalField but don't hold
         # Decimals. The real fix is to stop inheriting from DecimalField.
         return []
+
+
+# Register custom lookups that handle Money objects with currency checking
+MoneyField.register_lookup(MoneyExactLookup)
+MoneyField.register_lookup(MoneyLtLookup)
+MoneyField.register_lookup(MoneyLteLookup)
+MoneyField.register_lookup(MoneyGtLookup)
+MoneyField.register_lookup(MoneyGteLookup)
