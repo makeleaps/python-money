@@ -18,7 +18,7 @@ F = TypeVar("F", bound="MoneyField")
 class MoneyField(models.DecimalField[Money, Money]):
     _pyi_private_set_type: Money | Decimal | int  # type: ignore[assignment]
     _pyi_private_get_type: Money  # type: ignore[assignment]
-    _pyi_lookup_exact_type: Money | Decimal | int  # type: ignore[assignment]
+    _pyi_lookup_exact_type: Money | Decimal | int | float  # type: ignore[assignment]
 
     currency_field_name: str
 
