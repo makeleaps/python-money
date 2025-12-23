@@ -60,7 +60,7 @@ class MoneyCurrencyLookupMixin:
             # SQL for amount condition
             amount_condition = f"{lhs} {self.operator} {rhs}"
             amount_condition_sql = f"({amount_condition})"
-            amount_condition_params = lhs_params + [money.amount]
+            amount_condition_params = lhs_params + [str(money.amount)]
 
             # Get the money field
             model = self.lhs.field.model
@@ -94,33 +94,36 @@ class MoneyCurrencyLookupMixin:
             # Construct the full condition
             currency_condition = f"{currency_lhs} = %s"
             sql = f"({amount_condition} AND {currency_condition})"
-            params = lhs_params + [self.rhs.amount, self.rhs.currency.code]
+            params: _ParamsT = lhs_params + [
+                str(self.rhs.amount),
+                self.rhs.currency.code,
+            ]
             return sql, params
 
         # Normal lookup without currency check
         return f"{lhs} {self.operator} {rhs}", lhs_params + rhs_params
 
 
-class MoneyExactLookup(MoneyCurrencyLookupMixin, Lookup):
+class MoneyExactLookup(MoneyCurrencyLookupMixin, Lookup):  # type: ignore[type-arg]
     lookup_name = "exact"
     operator = "="
 
 
-class MoneyLtLookup(MoneyCurrencyLookupMixin, Lookup):
+class MoneyLtLookup(MoneyCurrencyLookupMixin, Lookup):  # type: ignore[type-arg]
     lookup_name = "lt"
     operator = "<"
 
 
-class MoneyLteLookup(MoneyCurrencyLookupMixin, Lookup):
+class MoneyLteLookup(MoneyCurrencyLookupMixin, Lookup):  # type: ignore[type-arg]
     lookup_name = "lte"
     operator = "<="
 
 
-class MoneyGtLookup(MoneyCurrencyLookupMixin, Lookup):
+class MoneyGtLookup(MoneyCurrencyLookupMixin, Lookup):  # type: ignore[type-arg]
     lookup_name = "gt"
     operator = ">"
 
 
-class MoneyGteLookup(MoneyCurrencyLookupMixin, Lookup):
+class MoneyGteLookup(MoneyCurrencyLookupMixin, Lookup):  # type: ignore[type-arg]
     lookup_name = "gte"
     operator = ">="

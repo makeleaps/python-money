@@ -24,7 +24,7 @@ class MoneyFieldProxy(object):
     """
 
     def __init__(self, field: "MoneyField"):
-        self.field: "MoneyField" = field
+        self.field = field
         self.amount_field_name: str = field.name
         self.currency_field_name: str = field.currency_field_name
 
