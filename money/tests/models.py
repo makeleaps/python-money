@@ -1,10 +1,8 @@
-from typing import TYPE_CHECKING, Any, ClassVar, TypeVar, Union
+from typing import Any, ClassVar, TypeVar, Union
 
 from django.db import models
 from django.db.models import QuerySet
-
-if TYPE_CHECKING:
-    from typing_extensions import Self
+from typing_extensions import Self
 
 from money.contrib.django.models import fields
 from money.money import Money
@@ -81,7 +79,7 @@ class NullableMoneyModel(models.Model):
 
 
 class CustomQuerySet(QuerySet[T]):
-    def only_usd(self, *args: Any, **kwargs: Any) -> "Self":
+    def only_usd(self, *args: Any, **kwargs: Any) -> Self:
         return self.filter(price_currency="USD", *args, **kwargs)
 
 

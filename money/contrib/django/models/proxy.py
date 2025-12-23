@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.db import models
 
-from money import Currency, Money
+from money.money import Currency, Money
 
 if TYPE_CHECKING:
     from money.contrib.django.models.fields import MoneyField
