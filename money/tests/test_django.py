@@ -132,7 +132,7 @@ class MoneyFieldTestCase(TestCase):
         queryset = SimpleMoneyModel.objects.filter(price__exact=UAH100)
         assert get_names(queryset) == ("UAH100",)
 
-        # Directt equal:
+        # Direct equal:
         queryset = SimpleMoneyModel.objects.filter(price=USD100)
         assert get_names(queryset) == ("USD100",)
         queryset = SimpleMoneyModel.objects.filter(price=EUR100)

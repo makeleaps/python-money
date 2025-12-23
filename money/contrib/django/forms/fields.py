@@ -30,7 +30,7 @@ class MoneyField(forms.MultiValueField):
             ),
             forms.ChoiceField(choices=choices),
         )
-        super().__init__(fields, *args, **kwargs)
+        super(MoneyField, self).__init__(fields, *args, **kwargs)
 
     def compress(self, data_list):
         """

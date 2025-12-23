@@ -11,7 +11,7 @@ class CurrencySelectWidget(forms.MultiWidget):
             forms.TextInput(attrs=attrs),
             forms.Select(attrs=attrs, choices=choices),
         )
-        super().__init__(widgets, attrs)
+        super(CurrencySelectWidget, self).__init__(widgets, attrs)
 
     def decompress(self, value):
         try:
