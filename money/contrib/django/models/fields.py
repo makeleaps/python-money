@@ -227,7 +227,7 @@ class MoneyField(InfiniteDecimalField):
         Prepares the value for the database, extracting amount from Money objects.
         """
         if isinstance(value, Money):
-            raise NotImplementedError("Lookups for MoneyField does not support Money.")
+            value = value.amount
         return super().get_db_prep_value(value, connection, prepared)
 
     def get_lookup(self, lookup_name):

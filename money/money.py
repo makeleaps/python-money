@@ -4,6 +4,12 @@ from typing import Union
 
 from typing_extensions import Self
 
+from money.exceptions import (
+    CurrencyMismatchException,
+    IncorrectMoneyInputError,
+    InvalidOperationException,
+)
+
 
 class Currency(object):
     code: str = "XXX"
@@ -47,19 +53,6 @@ class Currency(object):
 CURRENCY: dict[str, Currency] = {}
 CURRENCY["XXX"] = Currency(code="XXX", numeric="999")
 DEFAULT_CURRENCY: Currency = CURRENCY["XXX"]
-
-
-class IncorrectMoneyInputError(Exception):
-    """Invalid input for the Money object"""
-
-
-class CurrencyMismatchException(ArithmeticError):
-    """Raised when an operation is not allowed between differing currencies"""
-
-
-class InvalidOperationException(TypeError):
-    """Raised when an operation is never allowed"""
-
 
 CompareWithMoney = Union["Money", Decimal | int | float | str]
 

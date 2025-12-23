@@ -2,7 +2,8 @@ from decimal import Decimal
 
 import pytest
 
-from money.money import CURRENCY, Currency, IncorrectMoneyInputError, Money
+from money.exceptions import IncorrectMoneyInputError
+from money.money import CURRENCY, Currency, Money
 
 
 def test_string_parse() -> None:
