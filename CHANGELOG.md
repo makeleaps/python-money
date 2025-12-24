@@ -28,6 +28,7 @@ It includes breaking changes to imports and drops support for Python 2 and Pytho
 - Pull request template
 - Test coverage for Django lookups in `money/tests/test_django_lookups.py`
 - Test coverage for nullability in `money/tests/test_money_nullability.py`
+- Added CHANGELOG.md (extracted from README.md)
 
 ### Changed
 - Updated to Python 3.10 (tracked in `.python-version`)
@@ -42,6 +43,7 @@ It includes breaking changes to imports and drops support for Python 2 and Pytho
   - Moved `CURRENCY` to `money/constants.py`
   - Moved all custom exceptions to `money/exceptions.py`
   - Moved `MoneyFieldProxy` to `money/contrib/django/models/proxy.py`
+- Updated README.md format
 
 ### Removed
 - Support for Python 2
