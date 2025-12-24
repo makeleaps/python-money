@@ -6,53 +6,49 @@ Primitives for working with money and currencies in Python
 Compatibility
 =============
 
-This fork of python-money (rooted at poswald/python-money) is significantly
-different from other versions in the family tree. If you plan on using it,
-please be aware that it most likely won't be a drop-in replacement.
+This fork of python-money (rooted at poswald/python-money) is significantly different from other versions in the family tree.
+If you plan on using it, please be aware that it most likely won't be a drop-in replacement.
 
-We have made several changes to be more conservative about operations,
-remove implicit conversion of currency, remove global state, added a
-postgres specific field, and a `py.test` based test suite among other changes.
+We have made several changes to be more conservative about operations, remove implicit conversion of currency, remove global state, added a postgres specific field, and a `py.test` based test suite among other changes.
 
-You are free to use this version but please look at other forks as well as they
-may better suit your use case.
+You are free to use this version but please look at other forks as well as they may better suit your use case.
+
+Requirements
+============
+
+We currently support Django version `4.0.10` or `4.2.27`, with minimum Python version `3.10`.
 
 Installation
 ============
 
-You can install this project directly from the git repository using pip:
+Install this project directly from the git repository using pip:
 
-    $ pip install -e git+http://github.com/makeleaps/python-money.git@0.0.1#egg=python-money
-
-You do not have to specify the version number, but it might be a good idea.
+    $ pip install -e git+http://github.com/makeleaps/python-money.git@2.0.0#egg=python-money
 
 Usage
 =====
 
-This application contains several classes and functions that make dealing with
-money easier and less error-prone.
+This application contains several classes and functions that make dealing with money easier and less error-prone.
 
-### Currency Types
+### Currency dataclass
 
-The Currency class can be used to represent a type of Currency. It contains
-values for the currency's code, ISO number, name and the country it's used in.
-For example:
+The Currency dataclass is used to represent a type of Currency. 
+It contains values for the currency's code, ISO number, name and the country it's used in.
 
     Currency(code='BZD', numeric='084', name='Belize Dollar', countries=['BELIZE'])
 
-There is a dictionary of all ISO-4217 currencies:
+Use `CURRENCY` for all ISO-4217 currencies:
 
-    >>> from money.money import CURRENCY
-    >>> print CURRENCY['GBP'].name
+    >>> from money import CURRENCY
+    >>> print(CURRENCY['GBP'].name)
     Pound Sterling
 
-### Money Class
+### Money dataclass
 
-The Money class is available for doing arithmetic on values in defined
-currencies. It wraps the python Decimal type and gives you several convenience
-methods. Using this prevents you from making mistakes like adding Pounds and
-Dollars together, multiplying two money values or comparing different
-currencies. For example:
+The Money dataclass is available for doing arithmetic on values in defined currencies.
+It wraps the python Decimal type and gives you several convenience methods.
+Using this prevents you from making mistakes like adding Pounds and Dollars together, multiplying two money values or comparing different currencies.
+
 
     >>> usd = Money(amount=10.00, currency=CURRENCY['USD'])
     >>> print usd
@@ -264,53 +260,4 @@ TODO
 CHANGELOG
 ===
 
-* Version 1.1
-
-    - Python 3 compatibility
-    - Fix queryset returning the wrong value when running in Django 1.8
-
-* Version 1.0.1 (tagged 0.3.3)
-
-    - Add support or the `db_column` parameter
-
-* Version 1.0.0 (tagged 0.3.2)
-
-    Note: This fork of the project is now going to be version-managed separate
-    from other forks. This is the first release that we consider to be fully
-    'production ready' for our purposes. Future changes will follow semantic
-    versioning.
-
-    - Fixed several bugs in mathematical operations
-    - Better use of standard python packaging
-    - Added a full test suite
-    - Added coverage report generation
-    - Implement both python 2 and 3 division operators
-    - Division now returns Money objects
-    - Disable floor division
-    - Work toward making the `Money` immutable so it can safely be used as a
-      field default
-
-    The following backwards incompatible changes were made:
-
-    - Added python 2 and 3 boolean operations. Boolean evaluation of the money
-      class has changed to match the behavior of the Decimal class.
-    - Unsupported django ORM lookups now raise an exception that is a subclass
-      of `TypeError` as recommended by the django docs
-    - The `InvalidOperationException` now extends `TypeError` instead of the
-      `ArithmeticError` exception
-    - Removed the `set_default_currency` global function
-    - Removed the implicit currency conversion methods: `convert_to_default`,
-      `convert_to`, and `allocate`
-    - Removed the custom override of the `%` operator
-    - Removed the currency exchange rate form the `Currency` object and the
-      related `set_exchange_rate()` method.
-    - The `Money.from_string` method is now a classmethod
-
-
-* Version 0.2.0
-    - Fixed an issue with the South introspection rule for MoneyField similar
-    to [ South #327](http://south.aeracode.org/ticket/327) You will probably
-    need to generate a new schema migration if you are upgrading.
-
-* Version 0.1.0
-    - Initial version
+See [CHANGELOG.md](CHANGELOG.md) for release history.
