@@ -1,316 +1,254 @@
-python-money
-============
+# python-money
 
-Primitives for working with money and currencies in Python
+Python library for working with money and currencies, with Django integration.
 
-Compatibility
-=============
+## Features
 
-This fork of python-money (rooted at poswald/python-money) is significantly
-different from other versions in the family tree. If you plan on using it,
-please be aware that it most likely won't be a drop-in replacement.
+- **Type-safe money operations** - Prevent errors like adding USD and EUR
+- **Immutable currency handling** - Based on ISO-4217 standard
+- **Full type annotations** - 100% typed with mypy strict mode
+- **Django model field** - Store monetary values with proper currency tracking
+- **Conservative math operations** - Explicit currency conversions, no implicit behavior
 
-We have made several changes to be more conservative about operations,
-remove implicit conversion of currency, remove global state, added a
-postgres specific field, and a `py.test` based test suite among other changes.
+## Requirements
 
-You are free to use this version but please look at other forks as well as they
-may better suit your use case.
+- **Python:** 3.10 or higher
+- **Django:** 4.0.10 or 4.2.7
 
-Installation
-============
+## Installation
+```bash
+pip install git+https://github.com/makeleaps/python-money.git@v2.0.0
+```
 
-You can install this project directly from the git repository using pip:
+Or add to your `pyproject.toml`:
+```toml
+dependencies = [
+    "python-money@git+https://github.com/makeleaps/python-money.git@v2.0.0"
+]
+```
 
-    $ pip install -e git+http://github.com/makeleaps/python-money.git@0.0.1#egg=python-money
+## Quick Start
+```python
+from money import Money, CURRENCY
 
-You do not have to specify the version number, but it might be a good idea.
+# Create money values
+usd_price = Money('19.99', CURRENCY['USD'])
+usd_tax = Money('2.00', CURRENCY['USD'])
 
-Usage
-=====
+# Safe arithmetic
+usd_total = usd_price + usd_tax  # USD 21.99
 
-This application contains several classes and functions that make dealing with
-money easier and less error-prone.
+# Prevents currency mistakes
+eur = Money('10.00', CURRENCY['EUR'])
+usd_price + eur  # Raises CurrencyMismatchException
+```
 
-### Currency Types
+## About This Fork
 
-The Currency class can be used to represent a type of Currency. It contains
-values for the currency's code, ISO number, name and the country it's used in.
-For example:
+This fork (rooted at poswald/python-money) takes a **conservative approach** to money operations:
 
-    Currency(code='BZD', numeric='084', name='Belize Dollar', countries=['BELIZE'])
+- ✅ Explicit currency conversions only (no implicit conversion)
+- ✅ No global state or default currencies
+- ✅ Type-safe operations with full mypy coverage
+- ✅ Modern tooling (uv, ruff, pytest, nox)
 
-There is a dictionary of all ISO-4217 currencies:
+**Not a drop-in replacement** - If you're migrating from another fork, review the [CHANGELOG.md](CHANGELOG.md) for breaking changes, especially around imports and removed implicit conversion features.
 
-    >>> from money.money import CURRENCY
-    >>> print CURRENCY['GBP'].name
-    Pound Sterling
+## Usage
 
-### Money Class
+This application contains several classes and functions that make dealing with money easier and less error-prone.
 
-The Money class is available for doing arithmetic on values in defined
-currencies. It wraps the python Decimal type and gives you several convenience
-methods. Using this prevents you from making mistakes like adding Pounds and
-Dollars together, multiplying two money values or comparing different
-currencies. For example:
+### Currency
 
-    >>> usd = Money(amount=10.00, currency=CURRENCY['USD'])
-    >>> print usd
-    USD 10.00
+The `Currency` dataclass represents a type of currency with its code, ISO number, name, and countries:
+```python
+Currency(code='BZD', numeric='084', name='Belize Dollar', countries=['BELIZE'])
+```
 
-    >>> jpy = Money(amount=2000, currency=CURRENCY['JPY'])
-    >>> print jpy
-    JPY 2000.00
+Use the `CURRENCY` constant to access all ISO-4217 currencies:
+```python
+from money import CURRENCY
 
-    >>> print jpy * usd
-    Traceback (most recent call last):
-      File "<console>", line 1, in <module>
-      File "/python-money/money/Money.py", line 79, in __mul__
-        raise TypeError, 'can not multiply monetary quantities'
-    TypeError: can not multiply monetary quantities
+print(CURRENCY['GBP'].name)  # 'Pound Sterling'
+print(CURRENCY['USD'].code)  # 'USD'
+```
 
-    >>> print jpy > usd
-    Traceback (most recent call last):
-      File "<console>", line 1, in <module>
-      File "/Users/poswald/Projects/python-money/money/Money.py", line 137, in __gt__
-        raise TypeError, 'can not compare different currencies'
-    TypeError: can not compare different currencies
+### Money
 
-    >>> print 1 % usd
-    USD  0.10
+The `Money` dataclass handles arithmetic with currency values safely. It wraps Python's `Decimal` type and prevents common mistakes like adding different currencies or multiplying two money values:
+```python
+from money import Money, CURRENCY
 
-    >>> print usd * 5
-    USD 50.00
+# Create money values
+usd = Money(amount=10.00, currency=CURRENCY['USD'])
+print(usd)  # USD 10.00
 
-    >>> print (usd * 5).allocate((50,50))
-    [USD 25.00, USD 25.00]
-    >>> print (jpy * 5).allocate((50,50))
-    [JPY 5000.00, JPY 5000.00]
+jpy = Money(amount=2000, currency=CURRENCY['JPY'])
+print(jpy)  # JPY 2000.00
 
-### Default Currency
+# Safe operations
+print(usd * 5)      # USD 50.00
+print(usd + usd)    # USD 20.00
 
-This package assumes that you have a preferred default currency. Somewhere in
-your software's initialization you should set that currency:
+# Prevented operations
+print(jpy * usd)    # TypeError: can not multiply monetary quantities
+print(jpy > usd)    # TypeError: can not compare different currencies
+```
 
-    >>> from money.money import set_default_currency
-    >>> set_default_currency(code='USD')
-    >>> print Money(amount=23.45)
-    USD 23.45
+## Math Operations and Equality
 
-If you don't you will get a non-specified 'XXX' currency:
-
-    >>> print Money(amount=23.45)
-    XXX 23.45
-
-A Note About Equality and Math Operations
------------------------------------------
-
-The way equality is currently implemented, `USD 0` is not equal to `EUR 0` however,
-`USD 0` is considered equal to `0`. This means you can only compare similar
-currencies to each other, but it is safe to compare a currency to the value `0`.
-
-Comparing two differing currencies is undefined and will raise
-a `money.CurrencyMismatchException`. Prior versions of this project would do an
-implicit conversion to a 'base' currency using a defined conversion rate and
-perform the operation. We believe this is unexpected behavior, and it is better
-to let the user do that conversion themselves for the cases where they know they
-are comparing differing currencies.
-
-Similarly, we take a conservative approach to certain math operations. For
-example, `Money(10, 'USD') - Money(3, 'JPY')` is not allowed due to differing
-currencies.
-
-Both `Money(3, 'USD') * Money(3, 'USD')` and `Money(9, 'USD') / Money(3, 'USD')`
-are undefined. There are 3 conceivable ways to handle division:
-
-    Money(9, 'USD') / Money(3, 'USD') # Money(3, 'XXX') # where 'XXX' denotes undefined currency
-    Money(9, 'USD') / Money(3, 'USD') # Decimal('3')
-    Money(9, 'USD') / Money(3, 'USD') # raise money.InvalidOperationException
-
-We have chosen the last option as it is the most conservative option. You can
-always emulate the first two by using the underlying amounts:
-
-    Money(9, 'USD').amount / Money(3, 'USD').amount # Decimal('3')
-    Money(Money(9, 'USD').amount / Money(3, 'USD').amount) # Money('3', 'XXX')
-
-This makes the intention of the code more clear.
-
-As an exception to that, we allow diving a Money object by a number:
-
-    Money(9, 'USD') / 3 # Money(3, 'USD')
-
-
-Boolean Evaluation
-------------------
-
-When evaluated in a boolean context, the `Money` type behaves similar to the
-python `Decimal` class:
-
-    bool(Decimal('0'))    # False
-    bool(Decimal('0.1'))  # True
-
-    bool(Money('0', 'USD'))    # False
-    bool(Money('0.01', 'USD')) # True
-    bool(Money('1'))           # True
-
-To test for the existence of the objects, compare the value to `None`:
-
-    if amount is None:
-        amount = Money(0)
-
-Django
-======
-
-This package includes some classes as a convenience to Django users. These are
-entirely optional.
-
-### Model Field
-
-Add a currency field to your models. This field takes similar parameters as
-the Django DecimalField:
-
-    from money.contrib.django.models.fields import MoneyField
-
-    class Thing(models.Model):
-        ...
-        price = MoneyField(default=0, max_digits=12, decimal_places=2)
-        ...
-
-Now run `./manage.py dbsync` or South migrate. Your database table will contain a field for holding the value and a second field for the currency type.
-In PostgreSQL, it might look like this:
-
-    price          | numeric(12,2)          | not null default NULL::numeric
-    price_currency | character varying(3)   | not null
-
-The value you get from your model will be a `Money` class:
-
-    thing = Thing.objects.get(id=123)
-    print repr(thing.price)
-    USD  199.99
-
-
-### User Defined Precision of Decimals in Postgres
-
-It can be difficult to represent decimals exactly as the user entered them with
-Django. If you use postgres, you can preserve the user's entered precision by
-using the PostgreSQL `numeric` type. Simply use the `InfiniteDecimalField`
-class and the value will be stored as entered by the user without having to
-define the precision in the model class.
-
-    InfiniteDecimalField
-
-This allows you to store and later retrieve a values like `3`, `3.0`, and
-`3.000` without losing the precision. The `MoneyField` class already extends this
-by default.
-
+### Currency Comparison
+- `USD 0 == EUR 0` → **False** (different currencies)
+- `USD 0 == 0` → **True** (can compare to zero)
+- `USD 10 == EUR 10` → **Raises `CurrencyMismatchException`**
+
+You can only compare money with the same currency or with `0`.
+
+### Supported Operations
+
+**Allowed:**
+```python
+Money(10, 'USD') + Money(5, 'USD')   # Money(15, 'USD')
+Money(10, 'USD') - Money(5, 'USD')   # Money(5, 'USD')
+Money(10, 'USD') * 3                 # Money(30, 'USD')
+Money(10, 'USD') / 2                 # Money(5, 'USD')
+```
+
+**Not allowed:**
+```python
+Money(10, 'USD') + Money(5, 'EUR')   # CurrencyMismatchException
+Money(10, 'USD') * Money(3, 'USD')   # InvalidOperationException
+Money(10, 'USD') / Money(2, 'USD')   # InvalidOperationException
+```
+
+### Why Not Money / Money?
+
+Dividing two `Money` objects is ambiguous:
+- Should `Money(9, 'USD') / Money(3, 'USD')` return `Money(3, 'USD')`?
+- Or `Decimal('3')`?
+- Or `Money(3, 'XXX')` with undefined currency?
+
+To keep operations explicit, this raises `InvalidOperationException`. If you need to divide amounts, use:
+```python
+# Get a decimal ratio
+Money(9, 'USD').amount / Money(3, 'USD').amount  # Decimal('3')
+```
+
+This makes your intent clear and prevents accidental currency errors.
+
+## Boolean Evaluation
+
+`Money` behaves like Python's `Decimal` in boolean contexts:
+```python
+bool(Money('0', 'USD'))     # False
+bool(Money('0.01', 'USD'))  # True
+bool(Money('1', 'USD'))     # True
+```
+
+To check if a `Money` object exists, compare to `None`:
+```python
+if amount is None:
+    amount = Money(0, 'USD')
+```
+
+## Django Integration
+
+Optional Django support is included for convenience.
+
+### MoneyField
+
+Add a currency field to your models:
+```python
+from money.contrib.django.models.fields import MoneyField
+
+class Product(models.Model):
+    price = MoneyField(default=0, max_digits=12, decimal_places=2)
+```
+
+This creates two database columns:
+- `price` - stores the amount (e.g., `numeric(12,2)`)
+- `price_currency` - stores the currency code (e.g., `varchar(3)`)
+
+Usage:
+```python
+product = Product.objects.get(id=123)
+print(product.price)  # USD 199.99
+```
 
 ### Fixtures
 
-When loading from or serializing to fixtures, the field class expects the
-values to be specified separately:
+When using fixtures, specify amount and currency separately:
+```json
+{
+    "pk": 1,
+    "model": "myapp.product",
+    "fields": {
+        "price": "123.45",
+        "price_currency": "USD"
+    }
+}
+```
 
-    ...
-    {
-        "pk": 1,
-        "model": "myapp.mymodel",
-        "fields": {
-            "price": "123.45",
-            "price_currency": "USD",
-        }
-    },
-    ...
+### PostgreSQL Precision
 
-You may wish to examine the tests for an example
+The `MoneyField` uses PostgreSQL's `numeric` type to preserve user-entered precision. Values like `3`, `3.0`, and `3.000` are stored exactly as entered.
 
+### SQLite Limitation
 
-### Form Field
-
-The form field used by the `models.MoneyField` is also called `MoneyField`
-
-
-### Running Tests
-
-The test suite requires `py.test`, `django` and several other libraries to be
-installed. They will be downloaded and installed automatically when run.
-
-Tests can be run via the `setup.py` script:
-
-    $ python setup.py test
-
-If you wish to contribute code, please run these tests to ensure nothing breaks.
-
-
-SQLite
-------
-
-Due to [the way SQLite handles][sqlite_datatypes] `NUMERIC` values, a value
-like `100.00` will be coerced into an integer. This means the user entered
-precision is lost when saving to the database. The alternative would be to
-store the value as a `TEXT` affinity but then ORM comparison operations will
-break.
-
-If your application always specified the precision, this isn't a problem. If
-you need to maintain the user's precision, then SQLite is not recommended.
+SQLite coerces `NUMERIC` values like `100.00` into integers, losing decimal precision. If you need to preserve user-entered precision, PostgreSQL is recommended over SQLite.
 
 [sqlite_datatypes]: http://www.sqlite.org/datatype3.html
 
+## Local Development
 
-TODO
-====
+### Setup
 
-* Add more currency symbols to Currency class
-* Add number of decimal places to all Currencies. Who wants to help? :-)
+1. **Clone the repository:**
+```bash
+   git clone https://github.com/makeleaps/python-money.git
+   cd python-money
+```
 
-CHANGELOG
-===
+2. **Install `uv` and dependencies:**
+```bash
+   # Install uv (if not already installed)
+   
+   # Install all dependencies including dev dependencies
+   uv sync --dev
+```
 
-* Version 1.1
+3. **Activate the environment:**
+```bash
+   source .venv/bin/activate  # On Unix/macOS
+   # or
+   .venv\Scripts\activate     # On Windows
+```
 
-    - Python 3 compatibility
-    - Fix queryset returning the wrong value when running in Django 1.8
+### Running Tools
 
-* Version 1.0.1 (tagged 0.3.3)
+**Linting:**
+```bash
+uv run ruff check .
+uv run ruff format .
+```
 
-    - Add support or the `db_column` parameter
+**Type checking:**
+```bash
+uv run mypy .
+```
 
-* Version 1.0.0 (tagged 0.3.2)
+**Tests:**
+```bash
+uv run pytest
+```
 
-    Note: This fork of the project is now going to be version-managed separate
-    from other forks. This is the first release that we consider to be fully
-    'production ready' for our purposes. Future changes will follow semantic
-    versioning.
+**Install pre-commit hooks:**
+```bash
+uv run pre-commit install
+```
 
-    - Fixed several bugs in mathematical operations
-    - Better use of standard python packaging
-    - Added a full test suite
-    - Added coverage report generation
-    - Implement both python 2 and 3 division operators
-    - Division now returns Money objects
-    - Disable floor division
-    - Work toward making the `Money` immutable so it can safely be used as a
-      field default
+Once installed, pre-commit will automatically run `ruff`, `mypy`, and `pytest` before each commit.
 
-    The following backwards incompatible changes were made:
+## ChangeLogs
 
-    - Added python 2 and 3 boolean operations. Boolean evaluation of the money
-      class has changed to match the behavior of the Decimal class.
-    - Unsupported django ORM lookups now raise an exception that is a subclass
-      of `TypeError` as recommended by the django docs
-    - The `InvalidOperationException` now extends `TypeError` instead of the
-      `ArithmeticError` exception
-    - Removed the `set_default_currency` global function
-    - Removed the implicit currency conversion methods: `convert_to_default`,
-      `convert_to`, and `allocate`
-    - Removed the custom override of the `%` operator
-    - Removed the currency exchange rate form the `Currency` object and the
-      related `set_exchange_rate()` method.
-    - The `Money.from_string` method is now a classmethod
-
-
-* Version 0.2.0
-    - Fixed an issue with the South introspection rule for MoneyField similar
-    to [ South #327](http://south.aeracode.org/ticket/327) You will probably
-    need to generate a new schema migration if you are upgrading.
-
-* Version 0.1.0
-    - Initial version
+See [CHANGELOG.md](CHANGELOG.md) for release history.
