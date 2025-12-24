@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from typing_extensions import Self
 
 from money.contrib.django.models import fields
-from money.money import Money
+from money.dataclasses.money import Money
 
 T = TypeVar("T", bound=models.Model)
 

@@ -1,4 +1,4 @@
-from money.money import Currency
+from money.dataclasses.currency import Currency
 
 currency = Currency(
     code="ABC",

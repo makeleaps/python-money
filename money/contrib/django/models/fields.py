@@ -1,6 +1,12 @@
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Callable, Optional
+
 from django.db import models
+from django.db.backends.base.base import BaseDatabaseWrapper
+from django.db.models import NOT_PROVIDED, Lookup
 from django.utils.translation import gettext_lazy
 
+from money import Currency
 from money.contrib.django import forms
 from money.contrib.django.models.lookups import (
     MoneyExactLookup,
@@ -14,33 +20,28 @@ from money.contrib.django.models.utils import (
     currency_field_db_column,
     currency_field_name,
 )
-from money.money import Money
+from money.dataclasses.money import Money
 
-__all__ = ("MoneyField", "NotSupportedLookup")
+if TYPE_CHECKING:
+    from django.utils.functional import _StrOrPromise
+
+__all__ = ("MoneyField",)
+
+from money.exceptions import NotSupportedLookup
 
 SUPPORTED_LOOKUPS = ("exact", "lt", "gt", "lte", "gte", "isnull")
 
 
-class NotSupportedLookup(TypeError):
-    def __init__(self, lookup):
-        super(NotSupportedLookup, self).__init__()
-
-        self.lookup = lookup
-
-    def __str__(self):
-        return "Lookup '%s' is not supported for MoneyField" % self.lookup
-
-
 class InfiniteDecimalField(models.DecimalField):
-    def db_type(self, connection):
+    def db_type(self, connection: BaseDatabaseWrapper) -> str | None:
         engine = connection.settings_dict["ENGINE"]
 
         if "postgresql" in engine:
             return "numeric"
 
-        return super(InfiniteDecimalField, self).db_type(connection=connection)
+        return super().db_type(connection=connection)
 
-    def get_db_prep_save(self, value, *args, **kwargs):
+    def get_db_prep_save(self, value: Any, connection: BaseDatabaseWrapper) -> Any:
         """
         Called when the Field value must be saved to the database. As the
         default implementation just calls get_db_prep_value(), you shouldn't
@@ -53,7 +54,7 @@ class InfiniteDecimalField(models.DecimalField):
         # the precision in the field definition. The point of this class is to
         # use the user-specified precision up to that limit instead. For that
         # reason we will call get_db_prep_value instead
-        return self.get_db_prep_value(value, *args, **kwargs)
+        return self.get_db_prep_value(value, connection)
 
 
 class CurrencyField(models.CharField):
@@ -63,42 +64,82 @@ class CurrencyField(models.CharField):
     value when serializing to JSON.
     """
 
-    def value_to_string(self, obj):
+    def value_to_string(self, obj: models.Model) -> str:
         """
         When serializing, we want to output as two values. This will be just
         the currency part as stored directly in the database.
         """
         value = self.value_from_object(obj)
+        assert isinstance(value, str)
         return value
 
 
 class MoneyField(InfiniteDecimalField):
     description = gettext_lazy("An amount and type of currency")
 
+    default_currency: Currency | str
     add_currency_field: bool
+    amount_field_name: str
     currency_field_name: str
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
     # __metaclass__ = models.SubfieldBase
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        verbose_name: "_StrOrPromise | None" = None,
+        name: str | None = None,
+        max_digits: int | None = None,
+        decimal_places: int | None = None,
+        *,
+        primary_key: bool = False,
+        unique: bool = False,
+        blank: bool = False,
+        null: bool = False,
+        db_index: bool = False,
+        default: Money | Decimal | None | type[NOT_PROVIDED] = NOT_PROVIDED,
+        editable: bool = True,
+        auto_created: bool = False,
+        serialize: bool = True,
+        help_text: "_StrOrPromise" = "",
+        db_column: str | None = None,
+        db_tablespace: str | None = None,
+        # Extra props introduced by MoneyField
+        default_currency: str | Currency = "",
+        no_currency_field: bool = False,
+    ):
         # We add the currency field except when using frozen south orm. See introspection rules below.
-        default_currency = kwargs.pop("default_currency", "")
-        default = kwargs.get("default", None)
-        self.add_currency_field = not kwargs.pop("no_currency_field", False)
-        self.blankable = kwargs.get("blank", False)
+        self.add_currency_field = not no_currency_field
+        self.blankable = blank
 
         if isinstance(default, Money):
             self.default_currency = default.currency  # use the default's currency
-            kwargs["default"] = default.amount
+            default = default.amount
         else:
             self.default_currency = default_currency or ""  # use the kwarg passed in
 
-        super(MoneyField, self).__init__(*args, **kwargs)
+        super().__init__(
+            verbose_name=verbose_name,
+            name=name,
+            max_digits=max_digits,
+            decimal_places=decimal_places,
+            primary_key=primary_key,
+            unique=unique,
+            blank=blank,
+            null=null,
+            db_index=db_index,
+            default=default,
+            editable=editable,
+            auto_created=auto_created,
+            serialize=serialize,
+            help_text=help_text,
+            db_column=db_column,
+            db_tablespace=db_tablespace,
+        )
 
-    def deconstruct(self):
-        name, path, args, kwargs = super(MoneyField, self).deconstruct()
+    def deconstruct(self) -> Any:
+        name, path, args, kwargs = super().deconstruct()
         kwargs["no_currency_field"] = True
         return name, path, args, kwargs
 
@@ -109,7 +150,7 @@ class MoneyField(InfiniteDecimalField):
     # representation. To handle this, we're checking for string and seeing if
     # we can split it into two pieces. Otherwise, we assume we're dealing with
     # a string value
-    def to_python(self, value):
+    def to_python(self, value: Any) -> Any:
         if isinstance(value, str):
             try:
                 (currency, value) = value.split()
@@ -119,19 +160,22 @@ class MoneyField(InfiniteDecimalField):
                 pass
         return value
 
-    def contribute_to_class(self, cls, name):
+    def contribute_to_class(
+        self, cls: type[models.Model], name: str, private_only: bool = False
+    ) -> None:
         self.name = name
         self.amount_field_name = name
         self.currency_field_name = currency_field_name(name)
 
         if self.add_currency_field and not cls._meta.abstract:
+            currency_db_column = currency_field_db_column(self.db_column)
             c_field = CurrencyField(
                 max_length=3,
                 default=self.default_currency,
                 editable=False,
                 null=False,  # empty char fields should be ''
                 blank=self.blankable,
-                db_column=currency_field_db_column(self.db_column),
+                db_column=currency_db_column,
             )
             # Use this field's creation counter for the currency field. This
             # field will get a +1 when we call super
@@ -139,12 +183,12 @@ class MoneyField(InfiniteDecimalField):
             cls.add_to_class(self.currency_field_name, c_field)
 
         # Set ourselves up normally
-        super(MoneyField, self).contribute_to_class(cls, name)
+        super().contribute_to_class(cls, name)
 
         # As we are not using SubfieldBase, we need to set our proxy class here
         setattr(cls, self.name, MoneyFieldProxy(self))
 
-    def get_db_prep_save(self, value, *args, **kwargs):
+    def get_db_prep_save(self, value: Any, connection: BaseDatabaseWrapper) -> Any:
         """
         Called when the Field value must be saved to the database. As the
         default implementation just calls get_db_prep_value(), you shouldn't
@@ -155,9 +199,11 @@ class MoneyField(InfiniteDecimalField):
         if isinstance(value, Money):
             value = value.amount
 
-        return super(MoneyField, self).get_db_prep_save(value, *args, **kwargs)
+        return super().get_db_prep_save(value, connection)
 
-    def get_db_prep_value(self, value, connection, prepared=False):
+    def get_db_prep_value(
+        self, value: Any, connection: BaseDatabaseWrapper, prepared: bool = False
+    ) -> Any:
         """
         Prepares the value for the database, extracting amount from Money objects.
         """
@@ -165,7 +211,7 @@ class MoneyField(InfiniteDecimalField):
             value = value.amount
         return super().get_db_prep_value(value, connection, prepared)
 
-    def get_lookup(self, lookup_name):
+    def get_lookup(self, lookup_name: str) -> type[Lookup] | None:
         """
         Validates that only supported lookups are used.
         """
@@ -173,28 +219,34 @@ class MoneyField(InfiniteDecimalField):
             raise NotSupportedLookup(lookup_name)
         return super().get_lookup(lookup_name)
 
-    def get_default(self):
+    def get_default(self) -> Any:
         if isinstance(self.default, Money):
             return self.default
         else:
-            return super(MoneyField, self).get_default()
+            return super().get_default()
 
-    def value_to_string(self, obj):
+    def value_to_string(self, obj: models.Model) -> str:
         """
         When serializing this field, we will output both value and currency.
         Here we only need to output the value. The contributed currency field
         will get called to output itself
         """
         value = self.value_from_object(obj)
-        return value.amount
+        assert isinstance(value, Money)
+        return str(value.amount)
 
-    def formfield(self, **kwargs):
+    def formfield(
+        self,
+        form_class: Optional[Any] = None,
+        choices_form_class: Optional[Any] = None,
+        **kwargs: Any,
+    ) -> Any:
         defaults = {"form_class": forms.MoneyField}
         defaults.update(kwargs)
-        return super(MoneyField, self).formfield(**defaults)
+        return super().formfield(**defaults)
 
     @property
-    def validators(self):
+    def validators(self) -> list[Callable[[Any], None]]:
         # Hack around the fact that we inherit from DecimalField but don't hold
         # Decimals. The real fix is to stop inheriting from DecimalField.
         return []

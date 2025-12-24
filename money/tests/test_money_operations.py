@@ -3,7 +3,8 @@ from typing import Callable
 
 import pytest
 
-from money.money import CurrencyMismatchException, InvalidOperationException, Money
+from money.dataclasses.money import Money
+from money.exceptions import CurrencyMismatchException, InvalidOperationException
 
 MONEY_STRINGS: list[tuple[Money, str]] = [
     # Undefined currency:

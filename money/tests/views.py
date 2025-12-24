@@ -3,7 +3,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from money.contrib.django.forms.fields import MoneyField
-from money.money import Money
+from money.dataclasses.money import Money
 from money.tests.models import SimpleMoneyModel
 
 

@@ -3,13 +3,14 @@ from typing import TYPE_CHECKING, Any
 
 from django.db import models
 
-from money.money import Currency, Money
+from money.dataclasses.currency import Currency
+from money.dataclasses.money import Money
 
 if TYPE_CHECKING:
     from money.contrib.django.models.fields import MoneyField
 
 
-class MoneyFieldProxy(object):
+class MoneyFieldProxy:
     """
     An equivalent to Django's default attribute descriptor class SubfieldBase
     (normally enabled via `__metaclass__ = models.SubfieldBase` on the custom
