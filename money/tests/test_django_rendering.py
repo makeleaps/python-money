@@ -63,27 +63,31 @@ class TestView(TestCase):
         self.assertContains(response, "money.currency|JPY|")
 
 
-class TestEditView(TestCase):
+class TestFormView(TestCase):
     def setUp(self) -> None:
         self.client = Client()
 
-    def test_form_GET(self) -> None:
+    def test_GET(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "987.00", "currency": "JPY"})
         response = self.client.get(url)
         assert response.status_code == 200
 
+        self.assertContains(response, '<label for="id_name">Name:</label>')
+        self.assertContains(response, '<label for="id_price_0">Price:</label>')
         self.assertContains(response, 'value="987.00"')
         self.assertContains(response, '<option value="JPY" selected>JPY - Yen</option>')
 
-    def test_form_GET_zero(self) -> None:
+    def test_GET_zero(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "0.0", "currency": "JPY"})
         response = self.client.get(url)
         assert response.status_code == 200
 
+        self.assertContains(response, '<label for="id_name">Name:</label>')
+        self.assertContains(response, '<label for="id_price_0">Price:</label>')
         self.assertContains(response, 'value="0.0"')
         self.assertContains(response, '<option value="JPY" selected>JPY - Yen</option>')
 
-    def test_form_POST(self) -> None:
+    def test_POST(self) -> None:
         url = reverse(model_form_view, kwargs={"amount": "555.5", "currency": "JPY"})
 
         # We intentionally use decimals with a typically non-decimal currency
@@ -101,5 +105,7 @@ class TestEditView(TestCase):
         assert obj is not None
         assert str(obj.price) == "JPY 555.500"
 
+        self.assertContains(response, '<label for="id_name">Name:</label>')
+        self.assertContains(response, '<label for="id_price_0">Price:</label>')
         self.assertContains(response, "|item:name|value:ABC|")
         self.assertContains(response, "|item:price|value:JPY 555.5|")
