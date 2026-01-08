@@ -71,7 +71,6 @@ def regular_form_edit(request: HttpRequest, id: int) -> HttpResponse:
     instance = get_object_or_404(SimpleMoneyModel, pk=id)
     if request.method == "POST":
         form = SampleForm(request.POST, initial={"price": instance.price})
-        form = SampleForm(request.POST, initial={"price": instance.price})
 
         if form.is_valid():
             price = form.cleaned_data["price"]
