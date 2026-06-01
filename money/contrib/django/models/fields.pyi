@@ -2,7 +2,7 @@ from decimal import Decimal
 from typing import Any, TypeVar
 
 from django.db import models
-from django.db.models import Combinable
+from django.db.models.expressions import Combinable
 from django.utils.functional import _StrOrPromise
 
 from money.dataclasses.currency import Currency
