@@ -3,7 +3,11 @@ from typing import Any, Sequence
 
 from django import forms
 from django.utils.functional import _StrOrPromise
-from django.db.models.fields import _ErrorMessagesMapping, _ChoicesCallable, _FieldChoices
+from django.db.models.fields import (
+    _ErrorMessagesMapping,
+    _ChoicesCallable,
+    _FieldChoices,
+)
 from django.core.validators import _ValidatorCallable
 
 class MoneyField(forms.MultiValueField):
