@@ -8,13 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.1] - 2026-06-01
 
 ### Changed
-- Bumped Django dependency from `>=4.0.10, <=4.2.27` to `==4.2.30`
+- Bumped Django dependency from `>=4.0.10, <=4.2.27` to `>=4.0.10, <=4.2.30`
 - Pinned all dev dependencies to exact versions
 - Updated dev dependencies:
   - `ruff` 0.7.0 → 0.15.12
   - `django-stubs` 4.2.0 → 4.2.7
   - `mypy` 1.2.0 → 1.7.1
   - `pytest` 9.0.2 → 9.0.3
+- Updated noxfile and GitHub Actions CI to test against Django 4.2.30
 
 ## [2.0.0]
 
