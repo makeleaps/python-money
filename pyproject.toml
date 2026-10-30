@@ -35,6 +35,7 @@ dev = [
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]
 strict = true
+exclude = ["^build/"]
 
 [[tool.mypy.overrides]]
 module = "money.tests.test_money_operations"

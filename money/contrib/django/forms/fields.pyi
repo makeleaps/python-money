@@ -2,10 +2,10 @@ from decimal import Decimal
 from typing import Any, Sequence
 
 from django import forms
-from django.utils.functional import _StrOrPromise
+from django.core.validators import _ValidatorCallable
 from django.db.models.fields import _ErrorMessagesMapping
 from django.utils.choices import _ChoicesCallable, _ChoicesInput
-from django.core.validators import _ValidatorCallable
+from django.utils.functional import _StrOrPromise
 
 class MoneyField(forms.MultiValueField):
     def __init__(

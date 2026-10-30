@@ -1,13 +1,13 @@
-from django.urls import re_path, path
+from django.urls import path, re_path
 
 from money.tests.views import (
     instance_view,
-    model_view,
-    model_from_db_view,
+    model_form_edit,
     model_form_view,
+    model_from_db_view,
+    model_view,
     regular_form,
     regular_form_edit,
-    model_form_edit,
 )
 
 urlpatterns = [

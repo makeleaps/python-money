@@ -1,8 +1,8 @@
 from typing import Any
 
 from django import forms
-from typing_extensions import TypeAlias
 from django.utils.choices import _ChoicesInput
+from typing_extensions import TypeAlias
 
 _OptAttrs: TypeAlias = dict[str, Any]
 
