@@ -1,9 +1,10 @@
 from decimal import Decimal
-from typing import Any, TypeVar
+from typing import Any
 
 from django.db import models
 from django.db.models.expressions import Combinable
 from django.utils.functional import _StrOrPromise
+from typing_extensions import TypeVar
 
 from money.dataclasses.currency import Currency
 from money.dataclasses.money import Money
@@ -14,9 +15,11 @@ class CurrencyField(models.CharField[str, str]):
     _pyi_private_set_type: str | int | Combinable | Currency  # type: ignore[assignment]
     _pyi_private_get_type: str
 
-F = TypeVar("F", bound="MoneyField")
+F = TypeVar("F", bound="MoneyField[Any, Any]")
+_ST = TypeVar("_ST", contravariant=True, default=Any)
+_GT = TypeVar("_GT", covariant=True, default=Any)
 
-class MoneyField(models.DecimalField[Money, Money]):
+class MoneyField(models.DecimalField[_ST, _GT]):
     _pyi_private_set_type: Money | Decimal | int  # type: ignore[assignment]
     _pyi_private_get_type: Money  # type: ignore[assignment]
     _pyi_lookup_exact_type: Money | Decimal | int | float  # type: ignore[assignment]

@@ -250,12 +250,12 @@ def test_error_differing_currency_addition() -> None:
 def test_error_division_is_invalid() -> None:
     # Division of two currencies doesn't really make sense
     with pytest.raises(InvalidOperationException):
-        (Money(10, "USD") / Money(3, "USD"),)  # type: ignore[operator]
+        (Money(10, "USD") / Money(3, "USD"),)
 
 
 def test_differing_currency_division() -> None:
     with pytest.raises(InvalidOperationException):
-        (Money(10, "JPY") / Money(3, "USD"),)  # type: ignore[operator]
+        (Money(10, "JPY") / Money(3, "USD"),)
 
 
 def test_error_invalid_multiplication() -> None:

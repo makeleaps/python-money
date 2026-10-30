@@ -5,7 +5,7 @@ from nox import Session
 PYTHON_VERSIONS: list[str] = ["3.10", "3.11"]
 
 # Define Django versions you want to test
-DJANGO_VERSIONS: list[str] = ["4.2.30"]
+DJANGO_VERSIONS: list[str] = ["4.2.30", "5.2.18"]
 
 
 @nox.session(python=PYTHON_VERSIONS)
