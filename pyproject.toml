@@ -17,14 +17,14 @@ classifiers = [
 ]
 
 dependencies = [
-    "django>=4.0.10, <=4.2.30",
+    "django>=4.2, <5.3",
 ]
 
 [dependency-groups]
 dev = [
     "ruff==0.15.12",
-    "django-stubs[compatible-mypy]==4.2.7",
-    "mypy==1.7.1",
+    "django-stubs[compatible-mypy]==5.2.9",
+    "mypy==1.19.1",
     "psycopg2==2.9.9",
     "pytest==9.0.3",
     "pytest-django==4.11.1",

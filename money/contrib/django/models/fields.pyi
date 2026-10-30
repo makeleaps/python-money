@@ -14,9 +14,11 @@ class CurrencyField(models.CharField[str, str]):
     _pyi_private_set_type: str | int | Combinable | Currency  # type: ignore[assignment]
     _pyi_private_get_type: str
 
-F = TypeVar("F", bound="MoneyField")
+F = TypeVar("F", bound="MoneyField[Any, Any]")
+_ST = TypeVar("_ST", contravariant=True)
+_GT = TypeVar("_GT", covariant=True)
 
-class MoneyField(models.DecimalField[Money, Money]):
+class MoneyField(models.DecimalField[_ST, _GT]):
     _pyi_private_set_type: Money | Decimal | int  # type: ignore[assignment]
     _pyi_private_get_type: Money  # type: ignore[assignment]
     _pyi_lookup_exact_type: Money | Decimal | int | float  # type: ignore[assignment]

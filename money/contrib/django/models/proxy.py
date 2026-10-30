@@ -24,7 +24,7 @@ class MoneyFieldProxy:
     See: http://blog.elsdoerfer.name/2008/01/08/fuzzydates-or-one-django-model-field-multiple-database-columns/
     """
 
-    def __init__(self, field: "MoneyField"):
+    def __init__(self, field: "MoneyField[Any, Any]"):
         self.field = field
         self.amount_field_name: str = field.name
         self.currency_field_name: str = field.currency_field_name
