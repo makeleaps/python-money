@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `mypy` 1.7.1 → 1.19.1
 - Made the `MoneyField` stub generic so mypy infers `Money | None` for nullable fields
 - Updated noxfile and GitHub Actions CI to test against Django 4.2.30 and 5.2.18
+- Form field stubs import choice types from `django.utils.choices`, so they need django-stubs 5.x. With older django-stubs, `choices` is typed as `Any`
+
+### Removed
+- Dropped support for Django 4.0 and 4.1
 
 ## [2.0.1] - 2026-06-01
 

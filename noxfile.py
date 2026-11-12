@@ -12,9 +12,6 @@ DJANGO_VERSIONS: list[str] = ["4.2.30", "5.2.18"]
 @nox.parametrize("django", DJANGO_VERSIONS)
 def tests(session: Session, django: str) -> None:
     """Run tests with different Python and Django versions."""
-    # Skip incompatible combinations if you add Django 5.0+
-    # if session.python == "3.9" and django in ["5.0", "5.1"]:
-    #     session.skip("Django 5.0+ requires Python 3.10+")
 
     session.install(f"django=={django}")
     session.install("pytest", "pytest-django")

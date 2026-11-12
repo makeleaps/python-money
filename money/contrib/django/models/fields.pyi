@@ -15,7 +15,6 @@ class CurrencyField(models.CharField[str, str]):
     _pyi_private_set_type: str | int | Combinable | Currency  # type: ignore[assignment]
     _pyi_private_get_type: str
 
-F = TypeVar("F", bound="MoneyField[Any, Any]")
 _ST = TypeVar("_ST", contravariant=True, default=Any)
 _GT = TypeVar("_GT", covariant=True, default=Any)
 
