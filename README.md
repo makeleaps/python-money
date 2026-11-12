@@ -13,7 +13,7 @@ Python library for working with money and currencies, with Django integration.
 ## Requirements
 
 - **Python:** 3.10 or higher
-- **Django:** 4.2 or 5.2
+- **Django:** 4.2 to 5.2
 
 ## Installation
 ```bash

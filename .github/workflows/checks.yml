@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
         django-version: ["4.2.30", "5.2.18"]
     steps:
       - uses: actions/checkout@v4

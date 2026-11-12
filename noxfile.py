@@ -2,7 +2,7 @@ import nox
 from nox import Session
 
 # Define Python versions you want to test
-PYTHON_VERSIONS: list[str] = ["3.10", "3.11"]
+PYTHON_VERSIONS: list[str] = ["3.10", "3.11", "3.12"]
 
 # Define Django versions you want to test
 DJANGO_VERSIONS: list[str] = ["4.2.30", "5.2.18"]
