@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-10-30
+
+### Changed
+- Bumped Django dependency from `>=4.0.10, <=4.2.30` to `>=4.2, <5.3` to support Django 5.2
+- Updated dev dependencies:
+  - `django-stubs` 4.2.7 → 5.2.9
+  - `mypy` 1.7.1 → 1.19.1
+- Made the `MoneyField` stub generic so mypy infers `Money | None` for nullable fields. A `MoneyField` annotation outside a model now needs type parameters under strict mypy, e.g. `MoneyField[Money | Decimal | int, Money | None]`
+- Updated noxfile and GitHub Actions CI to test against Django 4.2.30 and 5.2.18, and Python 3.12
+- Form field stubs import choice types from `django.utils.choices`, so they need django-stubs 5.x. With older django-stubs, `choices` is typed as `Any`
+
+### Removed
+- Dropped support for Django 4.0 and 4.1
+
 ## [2.0.1] - 2026-06-01
 
 ### Changed

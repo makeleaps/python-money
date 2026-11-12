@@ -13,17 +13,17 @@ Python library for working with money and currencies, with Django integration.
 ## Requirements
 
 - **Python:** 3.10 or higher
-- **Django:** 4.0.10 or 4.2.7
+- **Django:** 4.2 to 5.2
 
 ## Installation
 ```bash
-pip install git+https://github.com/makeleaps/python-money.git@v2.0.0
+pip install git+https://github.com/makeleaps/python-money.git@2.1.0
 ```
 
 Or add to your `pyproject.toml`:
 ```toml
 dependencies = [
-    "python-money@git+https://github.com/makeleaps/python-money.git@v2.0.0"
+    "python-money@git+https://github.com/makeleaps/python-money.git@2.1.0"
 ]
 ```
 
