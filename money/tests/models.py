@@ -25,6 +25,12 @@ class SimpleMoneyModel(models.Model):
         app_label = "tests"
 
 
+class ProxySimpleMoneyModel(SimpleMoneyModel):
+    class Meta:
+        app_label = "tests"
+        proxy = True
+
+
 class MoneyModelDefaultMoneyUSD(models.Model):
     name = models.CharField(max_length=100)
     price = fields.MoneyField(

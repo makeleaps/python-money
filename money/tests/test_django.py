@@ -1,5 +1,8 @@
+from decimal import Decimal
+
 import pytest
 from django.db import IntegrityError
+from django.db.models import Sum
 from django.test import TestCase
 
 from money.constants import CURRENCY
@@ -8,6 +11,7 @@ from money.exceptions import NotSupportedLookup
 from money.tests.models import (
     MoneyModelDefaultMoneyUSD,
     MoneyModelDefaults,
+    ProxySimpleMoneyModel,
     SimpleMoneyModel,
 )
 
@@ -34,6 +38,16 @@ def test_creating() -> None:
     for code in CURRENCY:
         count = SimpleMoneyModel.objects.filter(price_currency=code).count()
         assert count == 1
+
+
+@pytest.mark.django_db
+def test_proxy_model_queries_amount() -> None:
+    SimpleMoneyModel.objects.create(name="a", price=Money("1.5", "USD"))
+    SimpleMoneyModel.objects.create(name="b", price=Money("2.25", "USD"))
+
+    total = ProxySimpleMoneyModel.objects.aggregate(total=Sum("price"))["total"]
+
+    assert total == Decimal("3.75")
 
 
 @pytest.mark.django_db
