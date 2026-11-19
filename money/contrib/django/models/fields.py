@@ -81,6 +81,7 @@ class MoneyField(InfiniteDecimalField):
     add_currency_field: bool
     amount_field_name: str
     currency_field_name: str
+    currency_creation_counter: int
 
     # Don't extend SubfieldBase since we need to have access to both fields when
     # to_python is called. We need our code there instead of subfieldBase
@@ -137,6 +138,9 @@ class MoneyField(InfiniteDecimalField):
             db_column=db_column,
             db_tablespace=db_tablespace,
         )
+        self.currency_creation_counter = self.creation_counter
+        self.creation_counter = models.Field.creation_counter
+        models.Field.creation_counter += 1
 
     def deconstruct(self) -> Any:
         name, path, args, kwargs = super().deconstruct()
@@ -177,9 +181,9 @@ class MoneyField(InfiniteDecimalField):
                 blank=self.blankable,
                 db_column=currency_db_column,
             )
-            # Use this field's creation counter for the currency field. This
-            # field will get a +1 when we call super
-            c_field.creation_counter = self.creation_counter
+            # A shared counter makes the two fields compare equal, and Django 5
+            # then drops one of them from proxy and child models
+            c_field.creation_counter = self.currency_creation_counter
             cls.add_to_class(self.currency_field_name, c_field)
 
         # Set ourselves up normally
